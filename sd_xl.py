@@ -23,6 +23,8 @@ import numpy as np
 # Assuming your array is named img_array
 img_array = image.squeeze()  # Remove the batch dimension
 
+print(img_array.dtype)
+
 # Convert to uint8 if necessary
 if img_array.dtype != np.uint8:
     img_array = (img_array * 255).astype(np.uint8)

@@ -2,6 +2,7 @@ from diffusers import DiffusionPipeline
 import torch
 
 pipe = DiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")
+print(pipe)
 pipe.to("cuda")
 
 # if using torch < 2.0
