@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.utils.checkpoint
 
 import math
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from .unet_blocks import get_down_block, get_up_block, UNetMidBlock2DCrossAttn
 
@@ -302,13 +303,14 @@ class TVMUNet2DConditionModel(nn.Module):
 
         # time
         if time_embedding_type == "fourier":
-            time_embed_dim = time_embedding_dim or block_out_channels[0] * 2
-            if time_embed_dim % 2 != 0:
-                raise ValueError(f"`time_embed_dim` should be divisible by 2, but is {time_embed_dim}.")
-            self.time_proj = GaussianFourierProjection(
-                time_embed_dim // 2, set_W_to_weight=False, log=False, flip_sin_to_cos=flip_sin_to_cos
-            )
-            timestep_input_dim = time_embed_dim
+            # time_embed_dim = time_embedding_dim or block_out_channels[0] * 2
+            # if time_embed_dim % 2 != 0:
+            #     raise ValueError(f"`time_embed_dim` should be divisible by 2, but is {time_embed_dim}.")
+            # self.time_proj = GaussianFourierProjection(
+            #     time_embed_dim // 2, set_W_to_weight=False, log=False, flip_sin_to_cos=flip_sin_to_cos
+            # )
+            # timestep_input_dim = time_embed_dim
+            pass
         elif time_embedding_type == "positional":
             time_embed_dim = time_embedding_dim or block_out_channels[0] * 4
 
@@ -327,39 +329,39 @@ class TVMUNet2DConditionModel(nn.Module):
             cond_proj_dim=time_cond_proj_dim,
         )
 
-        if encoder_hid_dim_type is None and encoder_hid_dim is not None:
-            encoder_hid_dim_type = "text_proj"
-            self.register_to_config(encoder_hid_dim_type=encoder_hid_dim_type)
-            logger.info("encoder_hid_dim_type defaults to 'text_proj' as `encoder_hid_dim` is defined.")
+        # if encoder_hid_dim_type is None and encoder_hid_dim is not None:
+        #     encoder_hid_dim_type = "text_proj"
+        #     self.register_to_config(encoder_hid_dim_type=encoder_hid_dim_type)
+        #     logger.info("encoder_hid_dim_type defaults to 'text_proj' as `encoder_hid_dim` is defined.")
 
-        if encoder_hid_dim is None and encoder_hid_dim_type is not None:
-            raise ValueError(
-                f"`encoder_hid_dim` has to be defined when `encoder_hid_dim_type` is set to {encoder_hid_dim_type}."
-            )
+        # if encoder_hid_dim is None and encoder_hid_dim_type is not None:
+        #     raise ValueError(
+        #         f"`encoder_hid_dim` has to be defined when `encoder_hid_dim_type` is set to {encoder_hid_dim_type}."
+        #     )
 
-        if encoder_hid_dim_type == "text_proj":
-            self.encoder_hid_proj = nn.Linear(encoder_hid_dim, cross_attention_dim)
-        elif encoder_hid_dim_type == "text_image_proj":
-            # image_embed_dim DOESN'T have to be `cross_attention_dim`. To not clutter the __init__ too much
-            # they are set to `cross_attention_dim` here as this is exactly the required dimension for the currently only use
-            # case when `addition_embed_type == "text_image_proj"` (Kadinsky 2.1)`
-            self.encoder_hid_proj = TextImageProjection(
-                text_embed_dim=encoder_hid_dim,
-                image_embed_dim=cross_attention_dim,
-                cross_attention_dim=cross_attention_dim,
-            )
-        elif encoder_hid_dim_type == "image_proj":
-            # Kandinsky 2.2
-            self.encoder_hid_proj = ImageProjection(
-                image_embed_dim=encoder_hid_dim,
-                cross_attention_dim=cross_attention_dim,
-            )
-        elif encoder_hid_dim_type is not None:
-            raise ValueError(
-                f"encoder_hid_dim_type: {encoder_hid_dim_type} must be None, 'text_proj' or 'text_image_proj'."
-            )
-        else:
-            self.encoder_hid_proj = None
+        # if encoder_hid_dim_type == "text_proj":
+        #     self.encoder_hid_proj = nn.Linear(encoder_hid_dim, cross_attention_dim)
+        # elif encoder_hid_dim_type == "text_image_proj":
+        #     # image_embed_dim DOESN'T have to be `cross_attention_dim`. To not clutter the __init__ too much
+        #     # they are set to `cross_attention_dim` here as this is exactly the required dimension for the currently only use
+        #     # case when `addition_embed_type == "text_image_proj"` (Kadinsky 2.1)`
+        #     self.encoder_hid_proj = TextImageProjection(
+        #         text_embed_dim=encoder_hid_dim,
+        #         image_embed_dim=cross_attention_dim,
+        #         cross_attention_dim=cross_attention_dim,
+        #     )
+        # elif encoder_hid_dim_type == "image_proj":
+        #     # Kandinsky 2.2
+        #     self.encoder_hid_proj = ImageProjection(
+        #         image_embed_dim=encoder_hid_dim,
+        #         cross_attention_dim=cross_attention_dim,
+        #     )
+        # elif encoder_hid_dim_type is not None:
+        #     raise ValueError(
+        #         f"encoder_hid_dim_type: {encoder_hid_dim_type} must be None, 'text_proj' or 'text_image_proj'."
+        #     )
+        # else:
+        self.encoder_hid_proj = None
 
         # class embedding
         if class_embed_type is None and num_class_embeds is not None:
@@ -390,38 +392,38 @@ class TVMUNet2DConditionModel(nn.Module):
         else:
             self.class_embedding = None
 
-        if addition_embed_type == "text":
-            if encoder_hid_dim is not None:
-                text_time_embedding_from_dim = encoder_hid_dim
-            else:
-                text_time_embedding_from_dim = cross_attention_dim
+        # if addition_embed_type == "text":
+        #     if encoder_hid_dim is not None:
+        #         text_time_embedding_from_dim = encoder_hid_dim
+        #     else:
+        #         text_time_embedding_from_dim = cross_attention_dim
 
-            self.add_embedding = TextTimeEmbedding(
-                text_time_embedding_from_dim, time_embed_dim, num_heads=addition_embed_type_num_heads
-            )
-        elif addition_embed_type == "text_image":
-            # text_embed_dim and image_embed_dim DON'T have to be `cross_attention_dim`. To not clutter the __init__ too much
-            # they are set to `cross_attention_dim` here as this is exactly the required dimension for the currently only use
-            # case when `addition_embed_type == "text_image"` (Kadinsky 2.1)`
-            self.add_embedding = TextImageTimeEmbedding(
-                text_embed_dim=cross_attention_dim, image_embed_dim=cross_attention_dim, time_embed_dim=time_embed_dim
-            )
-        elif addition_embed_type == "text_time":
+        #     self.add_embedding = TextTimeEmbedding(
+        #         text_time_embedding_from_dim, time_embed_dim, num_heads=addition_embed_type_num_heads
+        #     )
+        # elif addition_embed_type == "text_image":
+        #     # text_embed_dim and image_embed_dim DON'T have to be `cross_attention_dim`. To not clutter the __init__ too much
+        #     # they are set to `cross_attention_dim` here as this is exactly the required dimension for the currently only use
+        #     # case when `addition_embed_type == "text_image"` (Kadinsky 2.1)`
+        #     self.add_embedding = TextImageTimeEmbedding(
+        #         text_embed_dim=cross_attention_dim, image_embed_dim=cross_attention_dim, time_embed_dim=time_embed_dim
+        #     )
+        if addition_embed_type == "text_time":
             self.add_time_proj = Timesteps(addition_time_embed_dim, flip_sin_to_cos, freq_shift)
             self.add_embedding = TimestepEmbedding(projection_class_embeddings_input_dim, time_embed_dim)
-        elif addition_embed_type == "image":
-            # Kandinsky 2.2
-            self.add_embedding = ImageTimeEmbedding(image_embed_dim=encoder_hid_dim, time_embed_dim=time_embed_dim)
-        elif addition_embed_type == "image_hint":
-            # Kandinsky 2.2 ControlNet
-            self.add_embedding = ImageHintTimeEmbedding(image_embed_dim=encoder_hid_dim, time_embed_dim=time_embed_dim)
-        elif addition_embed_type is not None:
-            raise ValueError(f"addition_embed_type: {addition_embed_type} must be None, 'text' or 'text_image'.")
+        # elif addition_embed_type == "image":
+        #     # Kandinsky 2.2
+        #     self.add_embedding = ImageTimeEmbedding(image_embed_dim=encoder_hid_dim, time_embed_dim=time_embed_dim)
+        # elif addition_embed_type == "image_hint":
+        #     # Kandinsky 2.2 ControlNet
+        #     self.add_embedding = ImageHintTimeEmbedding(image_embed_dim=encoder_hid_dim, time_embed_dim=time_embed_dim)
+        # elif addition_embed_type is not None:
+        #     raise ValueError(f"addition_embed_type: {addition_embed_type} must be None, 'text' or 'text_image'.")
 
         if time_embedding_act_fn is None:
             self.time_embed_act = None
-        else:
-            self.time_embed_act = get_activation(time_embedding_act_fn)
+        # else:
+        #     self.time_embed_act = get_activation(time_embedding_act_fn)
 
         self.down_blocks = nn.ModuleList([])
         self.up_blocks = nn.ModuleList([])
@@ -508,25 +510,25 @@ class TVMUNet2DConditionModel(nn.Module):
                 use_linear_projection=use_linear_projection,
                 upcast_attention=upcast_attention,
             )
-        elif mid_block_type == "UNetMidBlock2DSimpleCrossAttn":
-            self.mid_block = UNetMidBlock2DSimpleCrossAttn(
-                in_channels=block_out_channels[-1],
-                temb_channels=blocks_time_embed_dim,
-                resnet_eps=norm_eps,
-                resnet_act_fn=act_fn,
-                output_scale_factor=mid_block_scale_factor,
-                cross_attention_dim=cross_attention_dim[-1],
-                attention_head_dim=attention_head_dim[-1],
-                resnet_groups=norm_num_groups,
-                resnet_time_scale_shift=resnet_time_scale_shift,
-                skip_time_act=resnet_skip_time_act,
-                only_cross_attention=mid_block_only_cross_attention,
-                cross_attention_norm=cross_attention_norm,
-            )
-        elif mid_block_type is None:
-            self.mid_block = None
-        else:
-            raise ValueError(f"unknown mid_block_type : {mid_block_type}")
+        # elif mid_block_type == "UNetMidBlock2DSimpleCrossAttn":
+        #     self.mid_block = UNetMidBlock2DSimpleCrossAttn(
+        #         in_channels=block_out_channels[-1],
+        #         temb_channels=blocks_time_embed_dim,
+        #         resnet_eps=norm_eps,
+        #         resnet_act_fn=act_fn,
+        #         output_scale_factor=mid_block_scale_factor,
+        #         cross_attention_dim=cross_attention_dim[-1],
+        #         attention_head_dim=attention_head_dim[-1],
+        #         resnet_groups=norm_num_groups,
+        #         resnet_time_scale_shift=resnet_time_scale_shift,
+        #         skip_time_act=resnet_skip_time_act,
+        #         only_cross_attention=mid_block_only_cross_attention,
+        #         cross_attention_norm=cross_attention_norm,
+        #     )
+        # elif mid_block_type is None:
+        #     self.mid_block = None
+        # else:
+        #     raise ValueError(f"unknown mid_block_type : {mid_block_type}")
 
         # count how many layers upsample the images
         self.num_upsamplers = 0
@@ -582,16 +584,21 @@ class TVMUNet2DConditionModel(nn.Module):
             prev_output_channel = output_channel
 
         # out
-        if norm_num_groups is not None:
-            self.conv_norm_out = nn.GroupNorm(
-                num_channels=block_out_channels[0], num_groups=norm_num_groups, eps=norm_eps
-            )
+        # if norm_num_groups is not None:
+        #     self.conv_norm_out = nn.GroupNorm(
+        #         num_channels=block_out_channels[0], num_groups=norm_num_groups, eps=norm_eps
+        #     )
 
-            self.conv_act = get_activation(act_fn)
+        #     self.conv_act = get_activation(act_fn)
 
-        else:
-            self.conv_norm_out = None
-            self.conv_act = None
+        # else:
+        #     self.conv_norm_out = None
+        #     self.conv_act = None
+        self.conv_norm_out = nn.GroupNorm(
+            num_channels=block_out_channels[0], num_groups=norm_num_groups, eps=norm_eps
+        )
+
+        self.conv_act = nn.SiLU()
 
         conv_out_padding = (conv_out_kernel - 1) // 2
         self.conv_out = nn.Conv2d(
@@ -727,9 +734,9 @@ class TVMUNet2DConditionModel(nn.Module):
         for module in self.children():
             fn_recursive_set_attention_slice(module, reversed_slice_size)
 
-    def _set_gradient_checkpointing(self, module, value=False):
-        if isinstance(module, (CrossAttnDownBlock2D, DownBlock2D, CrossAttnUpBlock2D, UpBlock2D)):
-            module.gradient_checkpointing = value
+    # def _set_gradient_checkpointing(self, module, value=False):
+    #     if isinstance(module, (CrossAttnDownBlock2D, DownBlock2D, CrossAttnUpBlock2D, UpBlock2D)):
+    #         module.gradient_checkpointing = value
 
     def forward(
         self,
@@ -745,7 +752,8 @@ class TVMUNet2DConditionModel(nn.Module):
         mid_block_additional_residual: Optional[torch.Tensor] = None,
         encoder_attention_mask: Optional[torch.Tensor] = None,
         return_dict: bool = True,
-    ) -> Union[UNet2DConditionOutput, Tuple]:
+    # ) -> Union[UNet2DConditionOutput, Tuple]:
+    ):
         r"""
         The [`UNet2DConditionModel`] forward method.
 
@@ -784,7 +792,7 @@ class TVMUNet2DConditionModel(nn.Module):
         upsample_size = None
 
         if any(s % default_overall_up_factor != 0 for s in sample.shape[-2:]):
-            logger.info("Forward upsample size to force interpolation output size.")
+            print("Forward upsample size to force interpolation output size.")
             forward_upsample_size = True
 
         # ensure attention_mask is a bias, and give it a singleton query_tokens dimension
@@ -1024,4 +1032,5 @@ class TVMUNet2DConditionModel(nn.Module):
         if not return_dict:
             return (sample,)
 
-        return UNet2DConditionOutput(sample=sample)
+        # return UNet2DConditionOutput(sample=sample)
+        return sample
