@@ -19,12 +19,12 @@ def detect_available_torch_device() -> str:
 def get_unet(
     pipe,
     device_str: str,
-    cross_attention_dim=768,
+    cross_attention_dim=2048,
     attention_head_dim=8,
     use_linear_projection=False,
 ):
     model = TVMUNet2DConditionModel(
-        sample_size=64,
+        sample_size=128,
         cross_attention_dim=cross_attention_dim,
         attention_head_dim=attention_head_dim,
         use_linear_projection=use_linear_projection,
