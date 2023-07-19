@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Tuple
 from .attention_processor import Attention
 from .attention import AttentionBlock, SpatialTransformer
 from .resnet import Downsample2D, ResnetBlock2D, Upsample2D
+from .transformer_2d import Transformer2DModel
 
 
 def get_down_block(
@@ -417,14 +418,14 @@ class DownBlock2D(nn.Module):
 
                     return custom_forward
 
-                if is_torch_version(">=", "1.11.0"):
-                    hidden_states = torch.utils.checkpoint.checkpoint(
-                        create_custom_forward(resnet), hidden_states, temb, use_reentrant=False
-                    )
-                else:
-                    hidden_states = torch.utils.checkpoint.checkpoint(
-                        create_custom_forward(resnet), hidden_states, temb
-                    )
+                # if is_torch_version(">=", "1.11.0"):
+                hidden_states = torch.utils.checkpoint.checkpoint(
+                    create_custom_forward(resnet), hidden_states, temb, use_reentrant=False
+                )
+                # else:
+                #     hidden_states = torch.utils.checkpoint.checkpoint(
+                #         create_custom_forward(resnet), hidden_states, temb
+                #     )
             else:
                 hidden_states = resnet(hidden_states, temb)
 
@@ -550,7 +551,8 @@ class CrossAttnDownBlock2D(nn.Module):
 
                     return custom_forward
 
-                ckpt_kwargs: Dict[str, Any] = {"use_reentrant": False} if is_torch_version(">=", "1.11.0") else {}
+                # ckpt_kwargs: Dict[str, Any] = {"use_reentrant": False} if is_torch_version(">=", "1.11.0") else {}
+                ckpt_kwargs: Dict[str, Any] = {"use_reentrant": False}
                 hidden_states = torch.utils.checkpoint.checkpoint(
                     create_custom_forward(resnet),
                     hidden_states,
@@ -653,14 +655,14 @@ class UpBlock2D(nn.Module):
 
                     return custom_forward
 
-                if is_torch_version(">=", "1.11.0"):
-                    hidden_states = torch.utils.checkpoint.checkpoint(
-                        create_custom_forward(resnet), hidden_states, temb, use_reentrant=False
-                    )
-                else:
-                    hidden_states = torch.utils.checkpoint.checkpoint(
-                        create_custom_forward(resnet), hidden_states, temb
-                    )
+                # if is_torch_version(">=", "1.11.0"):
+                hidden_states = torch.utils.checkpoint.checkpoint(
+                    create_custom_forward(resnet), hidden_states, temb, use_reentrant=False
+                )
+                # else:
+                #     hidden_states = torch.utils.checkpoint.checkpoint(
+                #         create_custom_forward(resnet), hidden_states, temb
+                #     )
             else:
                 hidden_states = resnet(hidden_states, temb)
 
@@ -783,7 +785,8 @@ class CrossAttnUpBlock2D(nn.Module):
 
                     return custom_forward
 
-                ckpt_kwargs: Dict[str, Any] = {"use_reentrant": False} if is_torch_version(">=", "1.11.0") else {}
+                # ckpt_kwargs: Dict[str, Any] = {"use_reentrant": False} if is_torch_version(">=", "1.11.0") else {}
+                ckpt_kwargs: Dict[str, Any] = {"use_reentrant": False}
                 hidden_states = torch.utils.checkpoint.checkpoint(
                     create_custom_forward(resnet),
                     hidden_states,
