@@ -20,15 +20,29 @@ def get_unet(
     pipe,
     device_str: str,
     cross_attention_dim=2048,
-    attention_head_dim=8,
-    use_linear_projection=False,
+    attention_head_dim=[5, 10, 20],
+    use_linear_projection=True,
 ):
     model = TVMUNet2DConditionModel(
-        sample_size=128,
-        cross_attention_dim=cross_attention_dim,
-        attention_head_dim=attention_head_dim,
-        use_linear_projection=use_linear_projection,
-        device=device_str,
+        sample_size= 128,
+        in_channels= 4,
+        out_channels= 4,
+        center_input_sample= False,
+        flip_sin_to_cos= True,
+        freq_shift= 0,
+        down_block_types= ["DownBlock2D", "CrossAttnDownBlock2D", "CrossAttnDownBlock2D"],
+        up_block_types= ["CrossAttnUpBlock2D", "CrossAttnUpBlock2D", "UpBlock2D"],
+        block_out_channels= [320, 640, 1280],
+        layers_per_block= 2,
+        downsample_padding= 1,
+        mid_block_scale_factor= 1,
+        act_fn= "silu",
+        norm_num_groups= 32,
+        norm_eps= 1e-05,
+        cross_attention_dim= 2048,
+        attention_head_dim= [5, 10, 20],
+        use_linear_projection= True,
+        device= 'cpu'  # assuming you want a string parameter for the device
     )
     pt_model_dict = pipe.unet.state_dict()
     model_dict = {}
