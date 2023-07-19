@@ -4,8 +4,8 @@ import torch.utils.checkpoint
 
 from typing import Any, Dict, Optional, Tuple
 
+#TODO: check these 3 files
 from .attention_processor import Attention
-from .attention import AttentionBlock, SpatialTransformer
 from .resnet import Downsample2D, ResnetBlock2D, Upsample2D
 from .transformer_2d import Transformer2DModel
 
