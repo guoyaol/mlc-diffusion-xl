@@ -7,17 +7,7 @@ import torch.nn.functional as F
 
 from .attention_processor import SpatialNorm
 from .attention import AdaGroupNorm
-
-def get_activation(act_fn):
-    if act_fn in ["swish", "silu"]:
-        return nn.SiLU()
-    elif act_fn == "mish":
-        return nn.Mish()
-    elif act_fn == "gelu":
-        return nn.GELU()
-    else:
-        raise ValueError(f"Unsupported activation function: {act_fn}")
-
+from .activations import get_activation
 
 class Upsample2D(nn.Module):
     """A 2D upsampling layer with an optional convolution.
