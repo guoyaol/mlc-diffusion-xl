@@ -1,4 +1,77 @@
-class Transformer2DModel(ModelMixin, ConfigMixin):
+from torch import nn
+import torch
+from typing import Any, Dict, Optional
+import torch.nn.functional as F
+import numpy as np
+from .attention import BasicTransformerBlock
+from .embeddings import PatchEmbed
+
+class ImagePositionalEmbeddings(nn.Module):
+    """
+    Converts latent image classes into vector embeddings. Sums the vector embeddings with positional embeddings for the
+    height and width of the latent space.
+
+    For more details, see figure 10 of the dall-e paper: https://arxiv.org/abs/2102.12092
+
+    For VQ-diffusion:
+
+    Output vector embeddings are used as input for the transformer.
+
+    Note that the vector embeddings for the transformer are different than the vector embeddings from the VQVAE.
+
+    Args:
+        num_embed (`int`):
+            Number of embeddings for the latent pixels embeddings.
+        height (`int`):
+            Height of the latent image i.e. the number of height embeddings.
+        width (`int`):
+            Width of the latent image i.e. the number of width embeddings.
+        embed_dim (`int`):
+            Dimension of the produced vector embeddings. Used for the latent pixel, height, and width embeddings.
+    """
+
+    def __init__(
+        self,
+        num_embed: int,
+        height: int,
+        width: int,
+        embed_dim: int,
+    ):
+        super().__init__()
+
+        self.height = height
+        self.width = width
+        self.num_embed = num_embed
+        self.embed_dim = embed_dim
+
+        self.emb = nn.Embedding(self.num_embed, embed_dim)
+        self.height_emb = nn.Embedding(self.height, embed_dim)
+        self.width_emb = nn.Embedding(self.width, embed_dim)
+
+    def forward(self, index):
+        emb = self.emb(index)
+
+        height_emb = self.height_emb(torch.arange(self.height, device=index.device).view(1, self.height))
+
+        # 1 x H x D -> 1 x H x 1 x D
+        height_emb = height_emb.unsqueeze(2)
+
+        width_emb = self.width_emb(torch.arange(self.width, device=index.device).view(1, self.width))
+
+        # 1 x W x D -> 1 x 1 x W x D
+        width_emb = width_emb.unsqueeze(1)
+
+        pos_emb = height_emb + width_emb
+
+        # 1 x H x W x D -> 1 x L xD
+        pos_emb = pos_emb.view(1, self.height * self.width, -1)
+
+        emb = emb + pos_emb[:, : emb.shape[1], :]
+
+        return emb
+
+
+class Transformer2DModel(nn.Module):
     """
     A 2D Transformer model for image-like data.
 
@@ -26,7 +99,6 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
             Configure if the `TransformerBlocks` attention should contain a bias parameter.
     """
 
-    @register_to_config
     def __init__(
         self,
         num_attention_heads: int = 16,
@@ -69,7 +141,7 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
                 " results in future versions. If you have downloaded this checkpoint from the Hugging Face Hub, it"
                 " would be very nice if you could open a Pull request for the `transformer/config.json` file"
             )
-            deprecate("norm_type!=num_embeds_ada_norm", "1.0.0", deprecation_message, standard_warn=False)
+            print(deprecation_message)
             norm_type = "ada_norm"
 
         if self.is_input_continuous and self.is_input_vectorized:
@@ -296,4 +368,5 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
         if not return_dict:
             return (output,)
 
-        return Transformer2DModelOutput(sample=output)
+        #TODO: verify that this is correct
+        return output
