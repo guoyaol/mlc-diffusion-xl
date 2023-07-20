@@ -352,6 +352,7 @@ class Attention(nn.Module):
 
     def prepare_attention_mask(self, attention_mask, target_length, batch_size=None, out_dim=3):
         if batch_size is None:
+            print("batch_size is None")
             # deprecate(
             #     "batch_size=None",
             #     "0.0.15",
@@ -492,7 +493,7 @@ class AttnProcessor2_0:
 
         hidden_states = hidden_states / attn.rescale_output_factor
 
-        return hidden_states  
+        return hidden_states
 
 
 class AttnProcessor:
@@ -559,7 +560,7 @@ class AttnProcessor:
         hidden_states = hidden_states / attn.rescale_output_factor
 
         return hidden_states
-    
+   
 
 class SpatialNorm(nn.Module):
     """
