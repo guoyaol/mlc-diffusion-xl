@@ -161,6 +161,83 @@ class TVMUNet2DConditionModel(nn.Module):
     ):
         super().__init__()
 
+        config_dict = {
+            "_class_name": "UNet2DConditionModel",
+            "_diffusers_version": "0.18.0.dev0",
+            "_name_or_path": "./unet",
+            "act_fn": "silu",
+            "addition_embed_type": "text_time",
+            "addition_embed_type_num_heads": 64,
+            "addition_time_embed_dim": 256,
+            "attention_head_dim": [
+                5,
+                10,
+                20
+            ],
+            "block_out_channels": [
+                320,
+                640,
+                1280
+            ],
+            "center_input_sample": False,
+            "class_embed_type": None,
+            "class_embeddings_concat": False,
+            "conv_in_kernel": 3,
+            "conv_out_kernel": 3,
+            "cross_attention_dim": 2048,
+            "cross_attention_norm": None,
+            "down_block_types": [
+                "DownBlock2D",
+                "CrossAttnDownBlock2D",
+                "CrossAttnDownBlock2D"
+            ],
+            "downsample_padding": 1,
+            "dual_cross_attention": False,
+            "encoder_hid_dim": None,
+            "encoder_hid_dim_type": None,
+            "flip_sin_to_cos": False,
+            "freq_shift": 0,
+            "in_channels": 4,
+            "layers_per_block": 2,
+            "mid_block_only_cross_attention": None,
+            "mid_block_scale_factor": 1,
+            "mid_block_type": "UNetMidBlock2DCrossAttn",
+            "norm_eps": 1e-05,
+            "norm_num_groups": 32,
+            "num_attention_heads": None,
+            "num_class_embeds": None,
+            "only_cross_attention": False,
+            "out_channels": 4,
+            "projection_class_embeddings_input_dim": 2816,
+            "resnet_out_scale_factor": 1.0,
+            "resnet_skip_time_act": False,
+            "resnet_time_scale_shift": "default",
+            "sample_size": 128,
+            "time_cond_proj_dim": None,
+            "time_embedding_act_fn": None,
+            "time_embedding_dim": None,
+            "time_embedding_type": "positional",
+            "timestep_post_act": None,
+            "transformer_layers_per_block": [
+                1,
+                2,
+                10
+            ],
+            "up_block_types": [
+                "CrossAttnUpBlock2D",
+                "CrossAttnUpBlock2D",
+                "UpBlock2D"
+            ],
+            "upcast_attention": False,
+            "use_linear_projection": False
+            }
+
+        class AttrDict(object):
+            def __init__(self, dictionary):
+                self.__dict__.update(dictionary)
+        
+        self.config = AttrDict(config_dict)
+
         self.sample_size = sample_size
 
         if num_attention_heads is not None:
@@ -708,9 +785,9 @@ class TVMUNet2DConditionModel(nn.Module):
         forward_upsample_size = False
         upsample_size = None
 
-        if any(s % default_overall_up_factor != 0 for s in sample.shape[-2:]):
-            print("Forward upsample size to force interpolation output size.")
-            forward_upsample_size = True
+        # if any(s % default_overall_up_factor != 0 for s in sample.shape[-2:]):
+        #     print("Forward upsample size to force interpolation output size.")
+        #     forward_upsample_size = True
 
         # ensure attention_mask is a bias, and give it a singleton query_tokens dimension
         # expects mask of shape:
@@ -739,17 +816,17 @@ class TVMUNet2DConditionModel(nn.Module):
 
         # 1. time
         timesteps = timestep
-        if not torch.is_tensor(timesteps):
-            # TODO: this requires sync between CPU and GPU. So try to pass timesteps as tensors if you can
-            # This would be a good case for the `match` statement (Python 3.10+)
-            is_mps = sample.device.type == "mps"
-            if isinstance(timestep, float):
-                dtype = torch.float32 if is_mps else torch.float64
-            else:
-                dtype = torch.int32 if is_mps else torch.int64
-            timesteps = torch.tensor([timesteps], dtype=dtype, device=sample.device)
-        elif len(timesteps.shape) == 0:
-            timesteps = timesteps[None].to(sample.device)
+        # if not torch.is_tensor(timesteps):
+        #     # TODO: this requires sync between CPU and GPU. So try to pass timesteps as tensors if you can
+        #     # This would be a good case for the `match` statement (Python 3.10+)
+        #     is_mps = sample.device.type == "mps"
+        #     if isinstance(timestep, float):
+        #         dtype = torch.float32 if is_mps else torch.float64
+        #     else:
+        #         dtype = torch.int32 if is_mps else torch.int64
+        #     timesteps = torch.tensor([timesteps], dtype=dtype, device=sample.device)
+        # elif len(timesteps.shape) == 0:
+        #     timesteps = timesteps[None].to(sample.device)
 
         # broadcast to batch dimension in a way that's compatible with ONNX/Core ML
         timesteps = timesteps.expand(sample.shape[0])
