@@ -14,8 +14,8 @@ from torch import fx
 print(tvm.__file__)
 
 #TODO: support fp16
-# pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9", torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
-pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9", torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
+# pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
 
 def clip_to_text_embeddings(pipe) -> tvm.IRModule:
     # Define the wrapper torch.nn.Module for CLIP.
@@ -42,3 +42,5 @@ def clip_to_text_embeddings(pipe) -> tvm.IRModule:
     assert len(mod.functions) == 1
 
     return tvm.IRModule({"clip": mod["subgraph_0"]})
+
+clip = clip_to_text_embeddings(pipe)

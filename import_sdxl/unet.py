@@ -51,3 +51,5 @@ def unet_latents_to_noise_pred(pipe, device_str: str) -> tvm.IRModule:
 torch_dev_key = "cpu"
 unet = unet_latents_to_noise_pred(pipe, torch_dev_key)
 
+print("successfully run through")
+
