@@ -76,6 +76,7 @@ def get_timestep_embedding(
     downscale_freq_shift: float = 1,
     scale: float = 1,
     max_period: int = 10000,
+    device = torch.device("cpu"),
 ):
     """
     This matches the implementation in Denoising Diffusion Probabilistic Models: Create sinusoidal timestep embeddings.
@@ -85,11 +86,11 @@ def get_timestep_embedding(
     :param embedding_dim: the dimension of the output. :param max_period: controls the minimum frequency of the
     embeddings. :return: an [N x dim] Tensor of positional embeddings.
     """
-    assert len(timesteps.shape) == 1, "Timesteps should be a 1d-array"
+    # assert len(timesteps.shape) == 1, "Timesteps should be a 1d-array"
 
     half_dim = embedding_dim // 2
     exponent = -math.log(max_period) * torch.arange(
-        start=0, end=half_dim, dtype=torch.float32, device=timesteps.device
+        start=0, end=half_dim, dtype=torch.float32, device=device
     )
     exponent = exponent / (half_dim - downscale_freq_shift)
 
