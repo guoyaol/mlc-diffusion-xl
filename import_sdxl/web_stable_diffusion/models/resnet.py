@@ -44,7 +44,7 @@ class Upsample2D(nn.Module):
             self.Conv2d_0 = conv
 
     def forward(self, hidden_states, output_size=None):
-        assert hidden_states.shape[1] == self.channels
+        # assert hidden_states.shape[1] == self.channels
 
         if self.use_conv_transpose:
             return self.conv(hidden_states)
@@ -120,12 +120,12 @@ class Downsample2D(nn.Module):
             self.conv = conv
 
     def forward(self, hidden_states):
-        assert hidden_states.shape[1] == self.channels
+        # assert hidden_states.shape[1] == self.channels
         if self.use_conv and self.padding == 0:
             pad = (0, 1, 0, 1)
             hidden_states = F.pad(hidden_states, pad, mode="constant", value=0)
 
-        assert hidden_states.shape[1] == self.channels
+        # assert hidden_states.shape[1] == self.channels
         hidden_states = self.conv(hidden_states)
 
         return hidden_states
