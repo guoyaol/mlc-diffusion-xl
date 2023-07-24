@@ -889,7 +889,7 @@ class TVMUNet2DConditionModel(nn.Module):
             time_embeds = self.add_time_proj(time_ids.flatten())
             time_embeds = time_embeds.reshape((text_embeds.shape[0], -1))
 
-            add_embeds = torch.concat([text_embeds, time_embeds], dim=-1)
+            add_embeds = torch.cat([text_embeds, time_embeds], dim=-1)
             add_embeds = add_embeds.to(emb.dtype)
             aug_emb = self.add_embedding(add_embeds)
         elif self.config.addition_embed_type == "image":
