@@ -26,11 +26,11 @@ def unet_latents_to_noise_pred(pipe, device_str: str) -> tvm.IRModule:
             # Default guidance scale factor in stable diffusion.
             self.guidance_scale = 7.5
 
-        def forward(self, latents, timestep_tensor, text_embeddings):
+        def forward(self, latents, timestep_tensor, text_embeddings, added_cond_kwargs_text_embeds, added_cond_kwargs_text_time_ids):
             # Latent concatenation.
             latent_model_input = torch.cat([latents] * 2, dim=0)
             # UNet forward.
-            noise_pred = self.unet(latent_model_input, timestep_tensor, text_embeddings)
+            noise_pred = self.unet(latent_model_input, timestep_tensor, text_embeddings, added_cond_kwargs_text_embeds, added_cond_kwargs_text_time_ids)
             # Classifier-free guidance.
             noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
             noise_pred = noise_pred_uncond + self.guidance_scale * (
@@ -43,7 +43,8 @@ def unet_latents_to_noise_pred(pipe, device_str: str) -> tvm.IRModule:
     graph = fx.symbolic_trace(unet_to_noise_pred)
     mod = from_fx(
         graph,
-        [((1, 4, 64, 64), "float32"), ((), "int32"), ((2, 77, 768), "float32")],
+        [((2, 4, 128, 128), "float32"), ((), "float64"), ((2, 77, 2048), "float32"), 
+         ((2, 1280), "float32"), ((2, 6), "float32")],
         keep_params_as_input=True,
     )
     return tvm.IRModule({"unet": mod["main"]})
