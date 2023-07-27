@@ -17,26 +17,27 @@ from typing import Dict, Optional, Tuple, Union
 import torch
 import torch.nn as nn
 
-from ..utils import BaseOutput, apply_forward_hook
+# from ..utils import BaseOutput, apply_forward_hook
+#TODO: check these two
 from .attention_processor import AttentionProcessor, AttnProcessor
 from .vae import Decoder, DecoderOutput, DiagonalGaussianDistribution, Encoder
 
 
-@dataclass
-class AutoencoderKLOutput(BaseOutput):
-    """
-    Output of AutoencoderKL encoding method.
+# @dataclass
+# class AutoencoderKLOutput(BaseOutput):
+#     """
+#     Output of AutoencoderKL encoding method.
 
-    Args:
-        latent_dist (`DiagonalGaussianDistribution`):
-            Encoded outputs of `Encoder` represented as the mean and logvar of `DiagonalGaussianDistribution`.
-            `DiagonalGaussianDistribution` allows for sampling latents from the distribution.
-    """
+#     Args:
+#         latent_dist (`DiagonalGaussianDistribution`):
+#             Encoded outputs of `Encoder` represented as the mean and logvar of `DiagonalGaussianDistribution`.
+#             `DiagonalGaussianDistribution` allows for sampling latents from the distribution.
+#     """
 
-    latent_dist: "DiagonalGaussianDistribution"
+#     latent_dist: "DiagonalGaussianDistribution"
 
 
-class AutoencoderKL(ModelMixin, ConfigMixin):
+class AutoencoderKL():
     r"""
     A VAE model with KL loss for encoding images into latents and decoding latent representations into images.
 
@@ -66,7 +67,6 @@ class AutoencoderKL(ModelMixin, ConfigMixin):
 
     _supports_gradient_checkpointing = True
 
-    @register_to_config
     def __init__(
         self,
         in_channels: int = 3,
@@ -222,8 +222,9 @@ class AutoencoderKL(ModelMixin, ConfigMixin):
         """
         self.set_attn_processor(AttnProcessor())
 
-    @apply_forward_hook
-    def encode(self, x: torch.FloatTensor, return_dict: bool = True) -> AutoencoderKLOutput:
+    # @apply_forward_hook
+    # def encode(self, x: torch.FloatTensor, return_dict: bool = True) -> AutoencoderKLOutput:
+    def encode(self, x: torch.FloatTensor, return_dict: bool = True):
         if self.use_tiling and (x.shape[-1] > self.tile_sample_min_size or x.shape[-2] > self.tile_sample_min_size):
             return self.tiled_encode(x, return_dict=return_dict)
 
@@ -239,7 +240,8 @@ class AutoencoderKL(ModelMixin, ConfigMixin):
         if not return_dict:
             return (posterior,)
 
-        return AutoencoderKLOutput(latent_dist=posterior)
+        # return AutoencoderKLOutput(latent_dist=posterior)
+        return posterior
 
     def _decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
         if self.use_tiling and (z.shape[-1] > self.tile_latent_min_size or z.shape[-2] > self.tile_latent_min_size):
@@ -253,7 +255,7 @@ class AutoencoderKL(ModelMixin, ConfigMixin):
 
         return DecoderOutput(sample=dec)
 
-    @apply_forward_hook
+    # @apply_forward_hook
     def decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
         if self.use_slicing and z.shape[0] > 1:
             decoded_slices = [self._decode(z_slice).sample for z_slice in z.split(1)]
@@ -278,7 +280,8 @@ class AutoencoderKL(ModelMixin, ConfigMixin):
             b[:, :, :, x] = a[:, :, :, -blend_extent + x] * (1 - x / blend_extent) + b[:, :, :, x] * (x / blend_extent)
         return b
 
-    def tiled_encode(self, x: torch.FloatTensor, return_dict: bool = True) -> AutoencoderKLOutput:
+    # def tiled_encode(self, x: torch.FloatTensor, return_dict: bool = True) -> AutoencoderKLOutput:
+    def tiled_encode(self, x: torch.FloatTensor, return_dict: bool = True):
         r"""Encode a batch of images using a tiled encoder.
 
         When this option is enabled, the VAE will split the input tensor into tiles to compute encoding in several
@@ -330,7 +333,8 @@ class AutoencoderKL(ModelMixin, ConfigMixin):
         if not return_dict:
             return (posterior,)
 
-        return AutoencoderKLOutput(latent_dist=posterior)
+        # return AutoencoderKLOutput(latent_dist=posterior)
+        return posterior
 
     def tiled_decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
         r"""
@@ -406,4 +410,5 @@ class AutoencoderKL(ModelMixin, ConfigMixin):
         if not return_dict:
             return (dec,)
 
-        return DecoderOutput(sample=dec)
+        # return DecoderOutput(sample=dec)
+        return dec
