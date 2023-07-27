@@ -6,6 +6,7 @@ import tvm
 from tvm import relax
 
 from .models.unet_2d_condition import TVMUNet2DConditionModel
+from .models.autoencoder_kl import AutoencoderKL
 
 
 def detect_available_torch_device() -> str:
@@ -157,3 +158,52 @@ def load_params(artifact_path: str, device) -> Dict[str, List[tvm.nd.NDArray]]:
             plist.append(params[f"{model}_{i}"])
         pdict[model] = plist
     return pdict
+
+def get_vae(
+    pipe,
+    device_str: str
+):
+    model = AutoencoderKL(
+        act_fn = "silu",
+        block_out_channels = [
+            128,
+            256,
+            512,
+            512
+        ],
+        down_block_types = [
+            "DownEncoderBlock2D",
+            "DownEncoderBlock2D",
+            "DownEncoderBlock2D",
+            "DownEncoderBlock2D"
+        ],
+        in_channels = 3,
+        latent_channels = 4,
+        layers_per_block = 2,
+        norm_num_groups = 32,
+        out_channels = 3,
+        sample_size = 1024,
+        scaling_factor = 0.13025,
+        up_block_types = [
+            "UpDecoderBlock2D",
+            "UpDecoderBlock2D",
+            "UpDecoderBlock2D",
+            "UpDecoderBlock2D"
+        ]
+    )
+    # pt_model_dict = pipe.unet.state_dict()
+    # model_dict = {}
+    # for name, tensor in pt_model_dict.items():
+    #     # if name.endswith("ff.net.0.proj.weight") or name.endswith("ff.net.0.proj.bias"):
+    #     #     w1, w2 = tensor.chunk(2, dim=0)
+    #     #     model_dict[name.replace("proj", "proj1")] = w1
+    #     #     model_dict[name.replace("proj", "proj2")] = w2
+    #     #     continue
+    #     # if (name.endswith("proj_in.weight") or name.endswith("proj_out.weight")) and len(tensor.shape) == 2:
+    #     #     # Convert Linear weights to 1x1 conv2d weights. This is necessary for SD v2 which uses
+    #     #     # use_linear_projection = True.
+    #     #     model_dict[name] = torch.unsqueeze(torch.unsqueeze(tensor, -1), -1)
+    #     #     continue
+    #     model_dict[name] = tensor
+    model.load_state_dict(pipe.vae.state_dict())
+    return model
