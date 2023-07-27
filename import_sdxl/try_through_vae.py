@@ -18,8 +18,18 @@ vae = utils.get_vae(pipe)
 vae = vae.to("mps")
 
 z = torch.rand((1, 4, 64, 64), dtype=torch.float32)
+z = z.to("mps")
 print("start to infer")
-out = vae(z)
+out = vae.decode(z)
 print(out)
+
+
+o_vae = pipe.vae
+o_vae = vae.to("mps")
+
+o_out = o_vae.decode(z)
+print(o_out)
+
+assert torch.allclose(out, o_out)
 
 print("successful run through")
