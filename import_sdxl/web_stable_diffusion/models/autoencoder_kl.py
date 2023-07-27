@@ -306,7 +306,7 @@ class AutoencoderKL(nn.Module):
                 z_slice).sample for z_slice in z.split(1)]
             decoded = torch.cat(decoded_slices)
         else:
-            decoded = self._decode(z).sample
+            decoded = self._decode(z)
 
         if not return_dict:
             return (decoded,)
