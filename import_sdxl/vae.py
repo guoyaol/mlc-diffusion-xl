@@ -29,7 +29,7 @@ def vae_to_image(pipe) -> tvm.IRModule:
             image = (image.permute(0, 2, 3, 1) * 255).round()
             return image
 
-    vae = pipe.vae
+    vae = utils.get_vae(pipe, "cpu")
     vae_to_image = VAEModelWrapper(vae)
 
     # z = torch.rand((1, 4, 64, 64), dtype=torch.float32)
