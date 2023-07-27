@@ -160,8 +160,7 @@ def load_params(artifact_path: str, device) -> Dict[str, List[tvm.nd.NDArray]]:
     return pdict
 
 def get_vae(
-    pipe,
-    device_str: str
+    pipe
 ):
     model = AutoencoderKL(
         act_fn = "silu",

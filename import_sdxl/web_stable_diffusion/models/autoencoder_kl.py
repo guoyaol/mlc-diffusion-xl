@@ -19,8 +19,9 @@ import torch.nn as nn
 
 # from ..utils import BaseOutput, apply_forward_hook
 # from .attention_processor import AttentionProcessor, AttnProcessor
-#TODO: check this
-from .vae import Decoder, DecoderOutput, DiagonalGaussianDistribution, Encoder
+# TODO: check this
+# from .vae import Decoder, DecoderOutput, DiagonalGaussianDistribution, Encoder
+from .vae import Decoder, DiagonalGaussianDistribution, Encoder
 
 
 # @dataclass
@@ -37,7 +38,7 @@ from .vae import Decoder, DecoderOutput, DiagonalGaussianDistribution, Encoder
 #     latent_dist: "DiagonalGaussianDistribution"
 
 
-class AutoencoderKL():
+class AutoencoderKL(nn.Module):
     r"""
     A VAE model with KL loss for encoding images into latents and decoding latent representations into images.
 
@@ -83,6 +84,44 @@ class AutoencoderKL():
     ):
         super().__init__()
 
+        config_dict = {
+            "_class_name": "AutoencoderKL",
+            "_diffusers_version": "0.18.0.dev0",
+            "_name_or_path": "./vae",
+            "act_fn": "silu",
+            "block_out_channels": [
+                128,
+                256,
+                512,
+                512
+            ],
+            "down_block_types": [
+                "DownEncoderBlock2D",
+                "DownEncoderBlock2D",
+                "DownEncoderBlock2D",
+                "DownEncoderBlock2D"
+            ],
+            "in_channels": 3,
+            "latent_channels": 4,
+            "layers_per_block": 2,
+            "norm_num_groups": 32,
+            "out_channels": 3,
+            "sample_size": 1024,
+            "scaling_factor": 0.13025,
+            "up_block_types": [
+                "UpDecoderBlock2D",
+                "UpDecoderBlock2D",
+                "UpDecoderBlock2D",
+                "UpDecoderBlock2D"
+            ]
+        }
+
+        class AttrDict(object):
+            def __init__(self, dictionary):
+                self.__dict__.update(dictionary)
+
+        self.config = AttrDict(config_dict)
+
         # pass init params to Encoder
         self.encoder = Encoder(
             in_channels=in_channels,
@@ -106,7 +145,8 @@ class AutoencoderKL():
             act_fn=act_fn,
         )
 
-        self.quant_conv = nn.Conv2d(2 * latent_channels, 2 * latent_channels, 1)
+        self.quant_conv = nn.Conv2d(
+            2 * latent_channels, 2 * latent_channels, 1)
         self.post_quant_conv = nn.Conv2d(latent_channels, latent_channels, 1)
 
         self.use_slicing = False
@@ -119,7 +159,8 @@ class AutoencoderKL():
             if isinstance(self.config.sample_size, (list, tuple))
             else self.config.sample_size
         )
-        self.tile_latent_min_size = int(sample_size / (2 ** (len(self.config.block_out_channels) - 1)))
+        self.tile_latent_min_size = int(
+            sample_size / (2 ** (len(self.config.block_out_channels) - 1)))
         self.tile_overlap_factor = 0.25
 
     def _set_gradient_checkpointing(self, module, value=False):
@@ -243,7 +284,8 @@ class AutoencoderKL():
         # return AutoencoderKLOutput(latent_dist=posterior)
         return posterior
 
-    def _decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
+    # def _decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
+    def _decode(self, z: torch.FloatTensor, return_dict: bool = True):
         if self.use_tiling and (z.shape[-1] > self.tile_latent_min_size or z.shape[-2] > self.tile_latent_min_size):
             return self.tiled_decode(z, return_dict=return_dict)
 
@@ -253,12 +295,15 @@ class AutoencoderKL():
         if not return_dict:
             return (dec,)
 
-        return DecoderOutput(sample=dec)
+        # return DecoderOutput(sample=dec)
+        return dec
 
     # @apply_forward_hook
-    def decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
+    # def decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
+    def decode(self, z: torch.FloatTensor, return_dict: bool = True):
         if self.use_slicing and z.shape[0] > 1:
-            decoded_slices = [self._decode(z_slice).sample for z_slice in z.split(1)]
+            decoded_slices = [self._decode(
+                z_slice).sample for z_slice in z.split(1)]
             decoded = torch.cat(decoded_slices)
         else:
             decoded = self._decode(z).sample
@@ -266,18 +311,21 @@ class AutoencoderKL():
         if not return_dict:
             return (decoded,)
 
-        return DecoderOutput(sample=decoded)
+        # return DecoderOutput(sample=decoded)
+        return decoded
 
     def blend_v(self, a, b, blend_extent):
         blend_extent = min(a.shape[2], b.shape[2], blend_extent)
         for y in range(blend_extent):
-            b[:, :, y, :] = a[:, :, -blend_extent + y, :] * (1 - y / blend_extent) + b[:, :, y, :] * (y / blend_extent)
+            b[:, :, y, :] = a[:, :, -blend_extent + y, :] * \
+                (1 - y / blend_extent) + b[:, :, y, :] * (y / blend_extent)
         return b
 
     def blend_h(self, a, b, blend_extent):
         blend_extent = min(a.shape[3], b.shape[3], blend_extent)
         for x in range(blend_extent):
-            b[:, :, :, x] = a[:, :, :, -blend_extent + x] * (1 - x / blend_extent) + b[:, :, :, x] * (x / blend_extent)
+            b[:, :, :, x] = a[:, :, :, -blend_extent + x] * \
+                (1 - x / blend_extent) + b[:, :, :, x] * (x / blend_extent)
         return b
 
     # def tiled_encode(self, x: torch.FloatTensor, return_dict: bool = True) -> AutoencoderKLOutput:
@@ -300,8 +348,10 @@ class AutoencoderKL():
                 If return_dict is True, a [`~models.autoencoder_kl.AutoencoderKLOutput`] is returned, otherwise a plain
                 `tuple` is returned.
         """
-        overlap_size = int(self.tile_sample_min_size * (1 - self.tile_overlap_factor))
-        blend_extent = int(self.tile_latent_min_size * self.tile_overlap_factor)
+        overlap_size = int(self.tile_sample_min_size *
+                           (1 - self.tile_overlap_factor))
+        blend_extent = int(self.tile_latent_min_size *
+                           self.tile_overlap_factor)
         row_limit = self.tile_latent_min_size - blend_extent
 
         # Split the image into 512x512 tiles and encode them separately.
@@ -309,7 +359,8 @@ class AutoencoderKL():
         for i in range(0, x.shape[2], overlap_size):
             row = []
             for j in range(0, x.shape[3], overlap_size):
-                tile = x[:, :, i : i + self.tile_sample_min_size, j : j + self.tile_sample_min_size]
+                tile = x[:, :, i: i + self.tile_sample_min_size,
+                         j: j + self.tile_sample_min_size]
                 tile = self.encoder(tile)
                 tile = self.quant_conv(tile)
                 row.append(tile)
@@ -336,7 +387,8 @@ class AutoencoderKL():
         # return AutoencoderKLOutput(latent_dist=posterior)
         return posterior
 
-    def tiled_decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
+    # def tiled_decode(self, z: torch.FloatTensor, return_dict: bool = True) -> Union[DecoderOutput, torch.FloatTensor]:
+    def tiled_decode(self, z: torch.FloatTensor, return_dict: bool = True):
         r"""
         Decode a batch of images using a tiled decoder.
 
@@ -350,8 +402,10 @@ class AutoencoderKL():
                 If return_dict is True, a [`~models.vae.DecoderOutput`] is returned, otherwise a plain `tuple` is
                 returned.
         """
-        overlap_size = int(self.tile_latent_min_size * (1 - self.tile_overlap_factor))
-        blend_extent = int(self.tile_sample_min_size * self.tile_overlap_factor)
+        overlap_size = int(self.tile_latent_min_size *
+                           (1 - self.tile_overlap_factor))
+        blend_extent = int(self.tile_sample_min_size *
+                           self.tile_overlap_factor)
         row_limit = self.tile_sample_min_size - blend_extent
 
         # Split z into overlapping 64x64 tiles and decode them separately.
@@ -360,7 +414,8 @@ class AutoencoderKL():
         for i in range(0, z.shape[2], overlap_size):
             row = []
             for j in range(0, z.shape[3], overlap_size):
-                tile = z[:, :, i : i + self.tile_latent_min_size, j : j + self.tile_latent_min_size]
+                tile = z[:, :, i: i + self.tile_latent_min_size,
+                         j: j + self.tile_latent_min_size]
                 tile = self.post_quant_conv(tile)
                 decoded = self.decoder(tile)
                 row.append(decoded)
@@ -382,7 +437,8 @@ class AutoencoderKL():
         if not return_dict:
             return (dec,)
 
-        return DecoderOutput(sample=dec)
+        # return DecoderOutput(sample=dec)
+        return dec
 
     def forward(
         self,
@@ -390,7 +446,8 @@ class AutoencoderKL():
         sample_posterior: bool = False,
         return_dict: bool = True,
         generator: Optional[torch.Generator] = None,
-    ) -> Union[DecoderOutput, torch.FloatTensor]:
+        # ) -> Union[DecoderOutput, torch.FloatTensor]:
+    ):
         r"""
         Args:
             sample (`torch.FloatTensor`): Input sample.
