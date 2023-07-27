@@ -15,14 +15,14 @@ from torch import fx
 print(tvm.__file__)
 
 #TODO: support fp16
-pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 # pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
 
 
 
 unet = utils.get_unet(pipe, "cpu")
 input1 = torch.rand((2, 4, 128, 128)).to(torch.float32).to("mps")
-input2 = torch.tensor(3).to(torch.float32).to("mps")
+input2 = torch.tensor(3).to("mps")
 input3 = torch.rand((2, 77, 2048)).to(torch.float32).to("mps")
 input4 = torch.rand((2, 1280)).to(torch.float32).to("mps")
 input5 = torch.rand((2, 6)).to(torch.float32).to("mps")

@@ -14,7 +14,7 @@ from torch import fx
 print(tvm.__file__)
 
 #TODO: support fp16
-pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 # pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
 
 def clip_to_text_embeddings(pipe) -> tvm.IRModule:
@@ -44,4 +44,4 @@ def clip_to_text_embeddings(pipe) -> tvm.IRModule:
     return tvm.IRModule({"clip": mod["subgraph_0"]})
 
 clip = clip_to_text_embeddings(pipe)
-print("successful run through")
+print("successful import")

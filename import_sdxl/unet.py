@@ -16,7 +16,7 @@ print(tvm.__file__)
 
 #TODO: support fp16
 # pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9", torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
-pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 
 def unet_latents_to_noise_pred(pipe, device_str: str) -> tvm.IRModule:
     class UNetModelWrapper(torch.nn.Module):
@@ -52,5 +52,5 @@ def unet_latents_to_noise_pred(pipe, device_str: str) -> tvm.IRModule:
 torch_dev_key = "cpu"
 unet = unet_latents_to_noise_pred(pipe, torch_dev_key)
 
-print("successfully run through")
+print("successfully import")
 

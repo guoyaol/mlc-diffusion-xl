@@ -29,7 +29,7 @@ def vae_to_image(pipe) -> tvm.IRModule:
             image = (image.permute(0, 2, 3, 1) * 255).round()
             return image
 
-    vae = utils.get_vae(pipe, "cpu")
+    vae = utils.get_vae(pipe)
     vae_to_image = VAEModelWrapper(vae)
 
     # z = torch.rand((1, 4, 64, 64), dtype=torch.float32)
@@ -49,5 +49,7 @@ def vae_to_image(pipe) -> tvm.IRModule:
     )
     return tvm.IRModule({"vae": mod["main"]})
 
-pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 vae = vae_to_image(pipe)
+
+print("successful import")
