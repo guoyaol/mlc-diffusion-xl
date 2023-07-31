@@ -32,9 +32,24 @@ input5 = torch.rand((2, 6)).to(torch.float32).to("mps")
 input_dict = {"text_embeds": input4, "time_ids": input5}
 unet = unet.to("mps")
 
+ori_unet = pipe.unet
+ori_unet = ori_unet.to("mps")
+ori_unet.eval()
+
+
+unet.eval()
+
 print("start inference")
 
-out = unet(input1, input2, input3, input4, input5)
+with torch.no_grad():
+    out = unet(input1, input2, input3, input4, input5)
+    ori_out = ori_unet(input1, input2, input3, added_cond_kwargs = input_dict)
 
-#save output
-torch.save(out, "out.pt")
+print("out")
+print(out)
+print("ori_out")
+print(ori_out)
+
+assert torch.allclose(out, ori_out.sample)
+
+print("successful run through")
