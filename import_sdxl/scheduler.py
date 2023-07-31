@@ -58,3 +58,6 @@ def euler_discrete_scheduler_steps() -> tvm.IRModule:
         bb.emit_func_output(prev_sample)
 
     return bb.get()
+
+scheduler = euler_discrete_scheduler_steps()
+print("successfully import")
