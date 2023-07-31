@@ -38,9 +38,9 @@ from torch import fx
 
 #     return (prev_sample,)
 
-def dpm_solver_multistep_scheduler_steps() -> tvm.IRModule:
+def euler_discrete_scheduler_steps() -> tvm.IRModule:
     bb = relax.BlockBuilder()
-    
+
     # step, the function.
     sample = relax.Var("sample", R.Tensor((1, 4, 64, 64), "float32"))
     model_output = relax.Var("model_output", R.Tensor((1, 4, 64, 64), "float32"))
