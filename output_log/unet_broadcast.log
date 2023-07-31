@@ -1,0 +1,32 @@
+(sdxl) guoyaoli@Guoyaos-MacBook-Pro import_sdxl % python unet.py
+/Users/guoyaoli/tvm_work/tvm/python/tvm/__init__.py
+Traceback (most recent call last):
+  File "/Users/guoyaoli/tvm_work/mlc-diffusion-refiner/import_sdxl/unet.py", line 53, in <module>
+    unet = unet_latents_to_noise_pred(pipe, torch_dev_key)
+  File "/Users/guoyaoli/tvm_work/mlc-diffusion-refiner/import_sdxl/unet.py", line 44, in unet_latents_to_noise_pred
+    mod = from_fx(
+  File "/Users/guoyaoli/tvm_work/tvm/python/tvm/relax/frontend/torch/fx_translator.py", line 1424, in from_fx
+    return TorchFXImporter().from_fx(
+  File "/Users/guoyaoli/tvm_work/tvm/python/tvm/relax/frontend/torch/fx_translator.py", line 1311, in from_fx
+    self.env[node] = self.convert_map[func_name](node)
+  File "/Users/guoyaoli/tvm_work/tvm/python/tvm/relax/frontend/torch/fx_translator.py", line 171, in _add
+    return self._call_binary_op(relax.op.add, lhs, rhs)
+  File "/Users/guoyaoli/tvm_work/tvm/python/tvm/relax/frontend/torch/fx_translator.py", line 134, in _call_binary_op
+    return self.block_builder.emit(op(lhs, rhs))
+  File "/Users/guoyaoli/tvm_work/tvm/python/tvm/relax/block_builder.py", line 293, in emit
+    return _ffi_api.BlockBuilderEmit(self, expr, name_hint)  # type: ignore
+  File "/Users/guoyaoli/tvm_work/tvm/python/tvm/_ffi/_ctypes/packed_func.py", line 238, in __call__
+    raise get_last_ffi_error()
+tvm._ffi.base.TVMError: Traceback (most recent call last):
+  [bt] (8) 9   libtvm.dylib                        0x0000000291a81de8 tvm::relax::Normalizer::VisitExpr_(tvm::relax::CallNode const*) + 1196
+  [bt] (7) 8   libtvm.dylib                        0x0000000291a898b0 tvm::relax::Normalizer::InferStructInfo(tvm::relax::Call const&) + 920
+  [bt] (6) 7   libtvm.dylib                        0x0000000291b566ec void tvm::runtime::TypedPackedFunc<tvm::relax::StructInfo (tvm::relax::Call const&, tvm::relax::BlockBuilder const&)>::AssignTypedLambda<tvm::relax::StructInfo (*)(tvm::relax::Call const&, tvm::relax::BlockBuilder const&)>(tvm::relax::StructInfo (*)(tvm::relax::Call const&, tvm::relax::BlockBuilder const&))::'lambda'(tvm::runtime::TVMArgs const&, tvm::runtime::TVMRetValue*)::operator()(tvm::runtime::TVMArgs const&, tvm::runtime::TVMRetValue*) const + 140
+  [bt] (5) 6   libtvm.dylib                        0x0000000291bd4678 tvm::relax::StructInfo tvm::relax::InferStructInfoBroadcast<tvm::runtime::DataType (*)(tvm::relax::Call const&, tvm::relax::BlockBuilder const&, tvm::relax::TensorStructInfo const&, tvm::relax::TensorStructInfo const&)>(tvm::relax::Call const&, tvm::relax::BlockBuilder const&, tvm::runtime::DataType (*)(tvm::relax::Call const&, tvm::relax::BlockBuilder const&, tvm::relax::TensorStructInfo const&, tvm::relax::TensorStructInfo const&)) + 272
+  [bt] (4) 5   libtvm.dylib                        0x0000000291bd3084 tvm::relax::InferBinaryBroadcastShape(tvm::relax::Call const&, tvm::relax::BlockBuilder const&, tvm::runtime::Array<tvm::PrimExpr, void> const&, tvm::runtime::Array<tvm::PrimExpr, void> const&) + 816
+  [bt] (3) 4   libtvm.dylib                        0x0000000291a7e7dc tvm::relax::BlockBuilderImpl::ReportFatal(tvm::Diagnostic const&) + 64
+  [bt] (2) 3   libtvm.dylib                        0x00000002914b4ca0 __clang_call_terminate + 0
+  [bt] (1) 2   libtvm.dylib                        0x00000002914b7ab8 tvm::runtime::detail::LogFatal::Entry::Finalize() + 0
+  [bt] (0) 1   libtvm.dylib                        0x00000002914b7afc tvm::runtime::detail::LogFatal::Entry::Finalize() + 68
+  File "/Users/guoyaoli/tvm_work/tvm/src/relax/ir/block_builder.cc", line 138
+TVMError: In Op(relax.add), the first input shape at dim 0 is T.int64(4) and the second input shape at dim 0 is T.int64(2), which are not broadcastable.
+[23:41:07] /Users/guoyaoli/tvm_work/tvm/src/relax/ir/block_builder.cc:64: Warning: BlockBuilder destroyed with remaining blocks!
