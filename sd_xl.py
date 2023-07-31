@@ -10,7 +10,7 @@ pipe.to("mps")
 # if using torch < 2.0
 # pipe.enable_xformers_memory_efficient_attention()
 
-prompt = "jellyfish floating in the forest"
+prompt = "a beautiful girl floating in galaxy"
 
 image = pipe(prompt=prompt, output_type="np.array").images
 # image[0].save("latent.png")
@@ -37,7 +37,7 @@ pre.save('pre.jpg')
 
 
 
-pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-refiner-0.9")
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-refiner-1.0")
 pipe.to("mps")
 
 # if using torch < 2.0
