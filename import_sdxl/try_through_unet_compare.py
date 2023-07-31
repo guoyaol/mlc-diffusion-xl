@@ -22,7 +22,6 @@ pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1
 torch.manual_seed(0)
 
 
-unet = utils.get_unet(pipe, "cpu")
 input1 = torch.rand((2, 4, 128, 128)).to(torch.float32).to("mps")
 input2 = torch.tensor(3).to("mps")
 input3 = torch.rand((2, 77, 2048)).to(torch.float32).to("mps")
@@ -30,11 +29,11 @@ input4 = torch.rand((2, 1280)).to(torch.float32).to("mps")
 input5 = torch.rand((2, 6)).to(torch.float32).to("mps")
 
 input_dict = {"text_embeds": input4, "time_ids": input5}
-unet = unet.to("mps")
+pipe.to("mps")
 
-print("start inference")
+out = pipe.unet(input1, input2, input3, input_dict)
 
-out = unet(input1, input2, input3, input4, input5)
+#load output from out.pt
+old_out = torch.load("out.pt")
 
-#save output
-torch.save(out, "out.pt")
+assert torch.allclose(out, old_out)
