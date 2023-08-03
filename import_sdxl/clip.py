@@ -61,13 +61,6 @@ print("our result")
 
 
 from tvm import meta_schedule as ms
-# db = ms.database.create(work_dir="scale_db")
-
-# p_mod = postprocess()
-# with target, db, tvm.transform.PassContext(opt_level=3):
-#     p_mod = relax.transform.MetaScheduleApplyDatabase()(p_mod)
-#     p_mod = tvm.tir.transform.DefaultGPUSchedule()(p_mod)
-db = ms.database.create(work_dir="scale_db")
 
 with target, tvm.transform.PassContext(opt_level=3):
     # clip = relax.transform.MetaScheduleApplyDatabase()(clip)
@@ -75,7 +68,7 @@ with target, tvm.transform.PassContext(opt_level=3):
 ex = relax.build(clip, target= target)
 vm = relax.VirtualMachine(ex, device)
 
-nd_res1 = vm["postprocess"](input_nd).numpy()
+nd_res1 = vm["clip"](input_nd).numpy()
 
 print(nd_res1)
 print(nd_res1.shape)
@@ -83,11 +76,7 @@ print(nd_res1.shape)
 
 #ref result
 print("ref result")
-# output_img = img.data.squeeze().float().cpu().clamp_(0, 1).numpy()
-# output_img = np.transpose(output_img[[2, 1, 0], :, :], (1, 2, 0))
 
-# print(output_img)
-# print(output_img.shape)
 ref_result = pipe.clip(input)[0].numpy()
 
 import numpy as np

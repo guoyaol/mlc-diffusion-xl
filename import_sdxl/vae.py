@@ -53,3 +53,41 @@ pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1
 vae = vae_to_image(pipe)
 
 print("successful import")
+
+#our random input
+input = torch.rand((1, 4, 64, 64)).to(torch.float32)
+
+target = tvm.target.Target("apple/m1-gpu")
+device = tvm.metal()
+
+input_nd = tvm.nd.array(input, device=device)
+
+
+#our result
+print("our result")
+
+
+from tvm import meta_schedule as ms
+# db = ms.database.create(work_dir="scale_db")
+
+
+with target, tvm.transform.PassContext(opt_level=3):
+    # clip = relax.transform.MetaScheduleApplyDatabase()(clip)
+    vae = tvm.tir.transform.DefaultGPUSchedule()(vae)
+ex = relax.build(vae, target= target)
+vm = relax.VirtualMachine(ex, device)
+
+nd_res1 = vm["vae"](input_nd).numpy()
+
+print(nd_res1)
+print(nd_res1.shape)
+
+
+#ref result
+print("ref result")
+
+ref_result = pipe.vae.decode(input)[0].numpy()
+
+import numpy as np
+np.testing.assert_array_equal(nd_res1, ref_result)
+print("test passed")
