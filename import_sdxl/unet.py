@@ -43,7 +43,7 @@ def unet_latents_to_noise_pred(pipe, device_str: str) -> tvm.IRModule:
     graph = fx.symbolic_trace(unet_to_noise_pred)
     mod = from_fx(
         graph,
-        [((2, 4, 128, 128), "float32"), ((), "int32"), ((2, 77, 2048), "float32"), 
+        [((1, 4, 128, 128), "float32"), ((), "int32"), ((2, 77, 2048), "float32"), 
          ((2, 1280), "float32"), ((2, 6), "float32")],
         keep_params_as_input=True,
     )
