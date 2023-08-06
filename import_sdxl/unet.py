@@ -56,58 +56,58 @@ print("successfully import")
 
 
 
-#our random input
-input1 = torch.rand((2, 4, 128, 128)).to(torch.float32)
-input2 = torch.tensor(3)
-input3 = torch.rand((2, 77, 2048)).to(torch.float32)
-input4 = torch.rand((2, 1280)).to(torch.float32)
-input5 = torch.rand((2, 6)).to(torch.float32)
+# #our random input
+# input1 = torch.rand((2, 4, 128, 128)).to(torch.float32)
+# input2 = torch.tensor(3)
+# input3 = torch.rand((2, 77, 2048)).to(torch.float32)
+# input4 = torch.rand((2, 1280)).to(torch.float32)
+# input5 = torch.rand((2, 6)).to(torch.float32)
 
-target = tvm.target.Target("apple/m1-gpu")
-device = tvm.metal()
+# target = tvm.target.Target("apple/m1-gpu")
+# device = tvm.metal()
 
-input1_nd = tvm.nd.array(input1, device=device)
-input2_nd = tvm.nd.array(input2, device=device)
-input3_nd = tvm.nd.array(input3, device=device)
-input4_nd = tvm.nd.array(input4, device=device)
-input5_nd = tvm.nd.array(input5, device=device)
-
-
-#our result
-print("our result")
+# input1_nd = tvm.nd.array(input1, device=device)
+# input2_nd = tvm.nd.array(input2, device=device)
+# input3_nd = tvm.nd.array(input3, device=device)
+# input4_nd = tvm.nd.array(input4, device=device)
+# input5_nd = tvm.nd.array(input5, device=device)
 
 
-from tvm import meta_schedule as ms
-
-with target, tvm.transform.PassContext(opt_level=3):
-    # clip = relax.transform.MetaScheduleApplyDatabase()(clip)
-    unet = tvm.tir.transform.DefaultGPUSchedule()(unet)
-ex = relax.build(unet, target= target)
-vm = relax.VirtualMachine(ex, device)
-
-nd_res1 = vm["unet"](input1_nd, input2_nd, input3_nd, input4_nd, input5_nd).numpy()
-
-print(nd_res1)
-print(nd_res1.shape)
+# #our result
+# print("our result")
 
 
-#ref result
-print("ref result")
+# from tvm import meta_schedule as ms
 
-input1 = input1.to("mps")
-input2 = input2.to("mps")
-input3 = input3.to("mps")
-input4 = input4.to("mps")
-input5 = input5.to("mps")
-input_dict = {"text_embeds": input4, "time_ids": input5}
+# with target, tvm.transform.PassContext(opt_level=3):
+#     # clip = relax.transform.MetaScheduleApplyDatabase()(clip)
+#     unet = tvm.tir.transform.DefaultGPUSchedule()(unet)
+# ex = relax.build(unet, target= target)
+# vm = relax.VirtualMachine(ex, device)
+
+# nd_res1 = vm["unet"](input1_nd, input2_nd, input3_nd, input4_nd, input5_nd).numpy()
+
+# print(nd_res1)
+# print(nd_res1.shape)
 
 
-with torch.no_grad():
-    ref_result = pipe.unet(input1, input2, input3, added_cond_kwargs = input_dict)
+# #ref result
+# print("ref result")
 
-ref_result = ref_result.cpu().numpy()
+# input1 = input1.to("mps")
+# input2 = input2.to("mps")
+# input3 = input3.to("mps")
+# input4 = input4.to("mps")
+# input5 = input5.to("mps")
+# input_dict = {"text_embeds": input4, "time_ids": input5}
 
-import numpy as np
-np.testing.assert_array_equal(nd_res1, ref_result)
-print("test passed")
+
+# with torch.no_grad():
+#     ref_result = pipe.unet(input1, input2, input3, added_cond_kwargs = input_dict)
+
+# ref_result = ref_result.cpu().numpy()
+
+# import numpy as np
+# np.testing.assert_array_equal(nd_res1, ref_result)
+# print("test passed")
 

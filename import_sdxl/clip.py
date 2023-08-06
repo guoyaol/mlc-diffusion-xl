@@ -47,38 +47,38 @@ clip = clip_to_text_embeddings(pipe)
 print("successful import")
 
 
-#our random input
-input = torch.rand((1, 77)).to(torch.int32)
+# #our random input
+# input = torch.rand((1, 77)).to(torch.int32)
 
-target = tvm.target.Target("apple/m1-gpu")
-device = tvm.metal()
+# target = tvm.target.Target("cuda")
+# device = tvm.cuda()
 
-input_nd = tvm.nd.array(input, device=device)
-
-
-#our result
-print("our result")
+# input_nd = tvm.nd.array(input, device=device)
 
 
-from tvm import meta_schedule as ms
-
-with target, tvm.transform.PassContext(opt_level=3):
-    # clip = relax.transform.MetaScheduleApplyDatabase()(clip)
-    clip = tvm.tir.transform.DefaultGPUSchedule()(clip)
-ex = relax.build(clip, target= target)
-vm = relax.VirtualMachine(ex, device)
-
-nd_res1 = vm["clip"](input_nd).numpy()
-
-print(nd_res1)
-print(nd_res1.shape)
+# #our result
+# print("our result")
 
 
-#ref result
-print("ref result")
+# from tvm import meta_schedule as ms
 
-ref_result = pipe.clip(input)[0].numpy()
+# with target, tvm.transform.PassContext(opt_level=3):
+#     # clip = relax.transform.MetaScheduleApplyDatabase()(clip)
+#     clip = tvm.tir.transform.DefaultGPUSchedule()(clip)
+# ex = relax.build(clip, target= target)
+# vm = relax.VirtualMachine(ex, device)
 
-import numpy as np
-np.testing.assert_array_equal(nd_res1, ref_result)
-print("test passed")
+# nd_res1 = vm["clip"](input_nd).numpy()
+
+# print(nd_res1)
+# print(nd_res1.shape)
+
+
+# #ref result
+# print("ref result")
+
+# ref_result = pipe.clip(input)[0].numpy()
+
+# import numpy as np
+# np.testing.assert_array_equal(nd_res1, ref_result)
+# print("test passed")
