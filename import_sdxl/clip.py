@@ -26,6 +26,7 @@ def clip_to_text_embeddings(pipe) -> tvm.IRModule:
 
         def forward(self, text_input_ids):
             result = self.clip(text_input_ids, output_hidden_states=True)
+            max_length=tokenizer.model_max_length
             text_embeddings = result.hidden_states[-2]
             pool_text_embeddings = result[0]
             return text_embeddings, pool_text_embeddings
