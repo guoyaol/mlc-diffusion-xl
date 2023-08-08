@@ -27,6 +27,11 @@ class BaseModelOutput():
     hidden_states: Optional[Tuple[torch.FloatTensor]] = None
     attentions: Optional[Tuple[torch.FloatTensor]] = None
 
+    def __init__(self, last_hidden_state = None, hidden_states = None, attentions = None):
+        self.last_hidden_state = last_hidden_state
+        self.hidden_states = hidden_states
+        self.attentions = attentions
+
 class BaseModelOutputWithPooling():
     """
     Base class for model's outputs that also contains a pooling of the last hidden states.
@@ -56,6 +61,24 @@ class BaseModelOutputWithPooling():
     pooler_output: torch.FloatTensor = None
     hidden_states: Optional[Tuple[torch.FloatTensor]] = None
     attentions: Optional[Tuple[torch.FloatTensor]] = None
+
+    def __init__(self, last_hidden_state = None, pooler_output = None, hidden_states = None, attentions = None):
+        self.last_hidden_state = last_hidden_state
+        self.pooler_output = pooler_output
+        self.hidden_states = hidden_states
+        self.attentions = attentions
+
+class CLIPTextModelOutput():
+    text_embeds: Optional[torch.FloatTensor] = None
+    last_hidden_state: torch.FloatTensor = None
+    hidden_states: Optional[Tuple[torch.FloatTensor]] = None
+    attentions: Optional[Tuple[torch.FloatTensor]] = None
+    
+    def __init__(self, text_embeds = None, last_hidden_state = None, hidden_states = None, attentions = None):
+        self.text_embeds = text_embeds
+        self.last_hidden_state = last_hidden_state
+        self.hidden_states = hidden_states
+        self.attentions = attentions
 
 class CLIPTextEmbeddings(nn.Module):
     def __init__(self, config):
@@ -284,11 +307,6 @@ class CLIPEncoderLayer(nn.Module):
 
         return outputs
 
-class CLIPTextModelOutput():
-    text_embeds: Optional[torch.FloatTensor] = None
-    last_hidden_state: torch.FloatTensor = None
-    hidden_states: Optional[Tuple[torch.FloatTensor]] = None
-    attentions: Optional[Tuple[torch.FloatTensor]] = None
 
 class CLIPEncoder(nn.Module):
     """
@@ -452,7 +470,7 @@ class CLIPTextTransformer(nn.Module):
             return_dict=return_dict,
         )
 
-        last_hidden_state = encoder_outputs[0]
+        last_hidden_state = encoder_outputs.last_hidden_state
         last_hidden_state = self.final_layer_norm(last_hidden_state)
 
         # text_embeds.shape = [batch_size, sequence_length, transformer.width]
@@ -533,7 +551,7 @@ class CLIPTextModelWithProjection(nn.Module):
             return_dict=return_dict,
         )
 
-        pooled_output = text_outputs[1]
+        pooled_output = text_outputs.pooler_output
 
         text_embeds = self.text_projection(pooled_output)
 
