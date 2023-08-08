@@ -1,7 +1,7 @@
 from torch import nn
 from typing import Optional, Tuple, Union
 import torch
-from t_activations import ACT2FN
+from .t_activations import ACT2FN
 
 class BaseModelOutput():
     """
@@ -58,7 +58,7 @@ class BaseModelOutputWithPooling():
     attentions: Optional[Tuple[torch.FloatTensor]] = None
 
 class CLIPTextEmbeddings(nn.Module):
-    def __init__(self, config: CLIPTextConfig):
+    def __init__(self, config):
         super().__init__()
         embed_dim = config.hidden_size
 
@@ -236,7 +236,7 @@ class CLIPMLP(nn.Module):
         return hidden_states
 
 class CLIPEncoderLayer(nn.Module):
-    def __init__(self, config: CLIPConfig):
+    def __init__(self, config):
         super().__init__()
         self.embed_dim = config.hidden_size
         self.self_attn = CLIPAttention(config)
@@ -299,7 +299,7 @@ class CLIPEncoder(nn.Module):
         config: CLIPConfig
     """
 
-    def __init__(self, config: CLIPConfig):
+    def __init__(self, config):
         super().__init__()
         self.config = config
         self.layers = nn.ModuleList([CLIPEncoderLayer(config) for _ in range(config.num_hidden_layers)])
@@ -393,7 +393,7 @@ class CLIPEncoder(nn.Module):
         )
 
 class CLIPTextTransformer(nn.Module):
-    def __init__(self, config: CLIPTextConfig):
+    def __init__(self, config):
         super().__init__()
         self.config = config
         embed_dim = config.hidden_size
@@ -469,19 +469,19 @@ class CLIPTextTransformer(nn.Module):
         )
 
 class CLIPTextModelWithProjection(nn.Module):
-    config_class = CLIPTextConfig
+    # config_class = CLIPTextConfig
 
     _no_split_modules = ["CLIPEncoderLayer"]
 
-    def __init__(self, config: CLIPTextConfig):
-        super().__init__(config)
+    def __init__(self, config):
+        super().__init__()
 
         self.text_model = CLIPTextTransformer(config)
 
         self.text_projection = nn.Linear(config.hidden_size, config.projection_dim, bias=False)
 
         # Initialize weights and apply final processing
-        self.post_init()
+        # self.post_init()
 
     def get_input_embeddings(self) -> nn.Module:
         return self.text_model.embeddings.token_embedding
