@@ -416,10 +416,15 @@ class CLIPTextTransformer(nn.Module):
         Returns:
 
         """
-        output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
+        # output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
+        output_attentions = True
+        # output_hidden_states = (
+        #     output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
+        # )
         output_hidden_states = (
-            output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
+            output_hidden_states if output_hidden_states is not None else True
         )
+
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         if input_ids is None:
@@ -516,7 +521,8 @@ class CLIPTextModelWithProjection(nn.Module):
         >>> outputs = model(**inputs)
         >>> text_embeds = outputs.text_embeds
         ```"""
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        # return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        return_dict = True
 
         text_outputs = self.text_model(
             input_ids=input_ids,
