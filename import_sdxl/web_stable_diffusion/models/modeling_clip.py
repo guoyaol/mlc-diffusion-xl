@@ -225,9 +225,12 @@ def _make_causal_mask(
     """
     bsz, tgt_len = input_ids_shape
     magic_dtype = torch.float32
+    magic_device = torch.device("cpu")
+    magic_tgt_len = 77
     # mask = torch.full((tgt_len, tgt_len), torch.finfo(dtype).min, device=device)
-    mask = torch.full((tgt_len, tgt_len), torch.finfo(magic_dtype).min, device=device)
-    mask_cond = torch.arange(mask.size(-1), device=device)
+    mask = torch.full((magic_tgt_len, magic_tgt_len), torch.finfo(magic_dtype).min, device=magic_device)
+    # mask_cond = torch.arange(mask.size(-1), device=device)
+    mask_cond = torch.arange(mask.size(-1), device=magic_device)
     mask.masked_fill_(mask_cond < (mask_cond + 1).view(mask.size(-1), 1), 0)
     mask = mask.to(dtype)
 
