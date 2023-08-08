@@ -57,8 +57,8 @@ print("successful import")
 #our random input
 input = torch.rand((1, 4, 64, 64)).to(torch.float32)
 
-target = tvm.target.Target("apple/m1-gpu")
-device = tvm.metal()
+target = tvm.target.Target("cuda")
+device = tvm.cuda()
 
 input_nd = tvm.nd.array(input, device=device)
 
