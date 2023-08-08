@@ -57,7 +57,7 @@ print("successfully import")
 
 
 #our random input
-input1 = torch.rand((2, 4, 128, 128)).to(torch.float32)
+input1 = torch.rand((1, 4, 128, 128)).to(torch.float32)
 input2 = torch.tensor(3)
 input3 = torch.rand((2, 77, 2048)).to(torch.float32)
 input4 = torch.rand((2, 1280)).to(torch.float32)
