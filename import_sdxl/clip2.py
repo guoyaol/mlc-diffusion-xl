@@ -27,7 +27,7 @@ def clip_to_text_embeddings(pipe) -> tvm.IRModule:
             self.clip = clip
 
         def forward(self, text_input_ids):
-            text_embeddings = self.clip(text_input_ids).text_embeds
+            text_embeddings = self.clip(text_input_ids)[0]
             return text_embeddings
 
     clip = get_clip(pipe)
@@ -57,8 +57,8 @@ with torch.no_grad():
     ref_out = pipe.text_encoder_2(text_input_ids)
 
 
-    assert torch.allclose(out.text_embeds, ref_out.text_embeds, atol=1e-4)
-    assert torch.allclose(out.last_hidden_state, ref_out.last_hidden_state, atol=1e-4)
+    assert torch.allclose(out[0], ref_out[0], atol=1e-4)
+    assert torch.allclose(out[1], ref_out[1], atol=1e-4)
 
     print("same result")
 
