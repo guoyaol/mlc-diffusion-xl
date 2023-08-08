@@ -163,19 +163,19 @@ class CLIPAttention(nn.Module):
         src_len = key_states.size(1)
         attn_weights = torch.bmm(query_states, key_states.transpose(1, 2))
 
-        if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
-            raise ValueError(
-                f"Attention weights should be of size {(bsz * self.num_heads, tgt_len, src_len)}, but is"
-                f" {attn_weights.size()}"
-            )
+        # if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
+        #     raise ValueError(
+        #         f"Attention weights should be of size {(bsz * self.num_heads, tgt_len, src_len)}, but is"
+        #         f" {attn_weights.size()}"
+        #     )
 
         # apply the causal_attention_mask first
         if causal_attention_mask is not None:
-            if causal_attention_mask.size() != (bsz, 1, tgt_len, src_len):
-                raise ValueError(
-                    f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is"
-                    f" {causal_attention_mask.size()}"
-                )
+            # if causal_attention_mask.size() != (bsz, 1, tgt_len, src_len):
+            #     raise ValueError(
+            #         f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is"
+            #         f" {causal_attention_mask.size()}"
+            #     )
             attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + causal_attention_mask
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
@@ -203,11 +203,11 @@ class CLIPAttention(nn.Module):
 
         attn_output = torch.bmm(attn_probs, value_states)
 
-        if attn_output.size() != (bsz * self.num_heads, tgt_len, self.head_dim):
-            raise ValueError(
-                f"`attn_output` should be of size {(bsz, self.num_heads, tgt_len, self.head_dim)}, but is"
-                f" {attn_output.size()}"
-            )
+        # if attn_output.size() != (bsz * self.num_heads, tgt_len, self.head_dim):
+        #     raise ValueError(
+        #         f"`attn_output` should be of size {(bsz, self.num_heads, tgt_len, self.head_dim)}, but is"
+        #         f" {attn_output.size()}"
+        #     )
 
         attn_output = attn_output.view(bsz, self.num_heads, tgt_len, self.head_dim)
         attn_output = attn_output.transpose(1, 2)
@@ -483,10 +483,16 @@ class CLIPTextTransformer(nn.Module):
         # text_embeds.shape = [batch_size, sequence_length, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)
         # casting to torch.int for onnx compatibility: argmax doesn't support int64 inputs with opset 14
+        magical_shape = 1
+        magical_device = torch.device("cpu")
         pooled_output = last_hidden_state[
-            torch.arange(last_hidden_state.shape[0], device=last_hidden_state.device),
+            torch.arange(magical_shape, device=magical_device),
             input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1),
         ]
+        # pooled_output = last_hidden_state[
+        #     torch.arange(last_hidden_state.shape[0], device=last_hidden_state.device),
+        #     input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1),
+        # ]
 
         if not return_dict:
             return (last_hidden_state, pooled_output) + encoder_outputs[1:]
