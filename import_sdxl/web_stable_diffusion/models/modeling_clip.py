@@ -180,10 +180,10 @@ class CLIPAttention(nn.Module):
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
         if attention_mask is not None:
-            if attention_mask.size() != (bsz, 1, tgt_len, src_len):
-                raise ValueError(
-                    f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is {attention_mask.size()}"
-                )
+            # if attention_mask.size() != (bsz, 1, tgt_len, src_len):
+            #     raise ValueError(
+            #         f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is {attention_mask.size()}"
+            #     )
             attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + attention_mask
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
@@ -248,6 +248,8 @@ def _expand_mask(mask: torch.Tensor, dtype: torch.dtype, tgt_len: Optional[int] 
     expanded_mask = mask[:, None, None, :].expand(bsz, 1, tgt_len, src_len).to(dtype)
 
     inverted_mask = 1.0 - expanded_mask
+    print("dtype here:")
+    print(dtype)
 
     return inverted_mask.masked_fill(inverted_mask.to(torch.bool), torch.finfo(dtype).min)
 
@@ -374,13 +376,16 @@ class CLIPEncoder(nn.Module):
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        encoder_states = () if output_hidden_states else None
-        all_attentions = () if output_attentions else None
+        # encoder_states = () if output_hidden_states else None
+        # all_attentions = () if output_attentions else None
+        encoder_states = ()
+        all_attentions = ()
 
         hidden_states = inputs_embeds
         for idx, encoder_layer in enumerate(self.layers):
-            if output_hidden_states:
-                encoder_states = encoder_states + (hidden_states,)
+            # if output_hidden_states:
+            #     encoder_states = encoder_states + (hidden_states,)
+            encoder_states = encoder_states + (hidden_states,)
             if self.gradient_checkpointing and self.training:
 
                 def create_custom_forward(module):
@@ -462,9 +467,9 @@ class CLIPTextTransformer(nn.Module):
         # https://github.com/openai/CLIP/blob/cfcffb90e69f37bf2ff1e988237a0fbe41f33c04/clip/model.py#L324
         causal_attention_mask = _make_causal_mask(input_shape, hidden_states.dtype, device=hidden_states.device)
         # expand attention_mask
-        if attention_mask is not None:
-            # [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
-            attention_mask = _expand_mask(attention_mask, hidden_states.dtype)
+        # if attention_mask is not None:
+        #     # [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
+        #     attention_mask = _expand_mask(attention_mask, hidden_states.dtype)
 
         encoder_outputs = self.encoder(
             inputs_embeds=hidden_states,
