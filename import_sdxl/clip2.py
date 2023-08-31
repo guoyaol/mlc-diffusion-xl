@@ -19,7 +19,7 @@ print(tvm.__file__)
 pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 # pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9")
 
-def clip_to_text_embeddings(pipe) -> tvm.IRModule:
+def clip_to_text_embeddings2(pipe) -> tvm.IRModule:
     # Define the wrapper torch.nn.Module for CLIP.
     class CLIPModelWrapper(torch.nn.Module):
         def __init__(self, clip):
@@ -43,9 +43,9 @@ def clip_to_text_embeddings(pipe) -> tvm.IRModule:
         text_input_ids,
         keep_params_as_input=True,
     )
-    # assert len(mod.functions) == 1
+    assert len(mod.functions) == 1
 
-    return tvm.IRModule({"clip": mod["subgraph_0"]})
+    return tvm.IRModule({"clip2": mod["subgraph_0"]})
 
-clip = clip_to_text_embeddings(pipe)
+clip = clip_to_text_embeddings2(pipe)
 print("successful import")
