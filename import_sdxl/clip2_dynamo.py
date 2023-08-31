@@ -27,10 +27,13 @@ def clip_to_text_embeddings(pipe) -> tvm.IRModule:
             self.clip = clip
 
         def forward(self, text_input_ids):
-            text_embeddings = self.clip(text_input_ids)[0]
-            return text_embeddings
+            result = self.clip(text_input_ids, output_hidden_states=True)
+            print(result)
+            text_embeddings = result.hidden_states[-2]
+            pool_text_embeddings = result[0]
+            return text_embeddings, pool_text_embeddings
 
-    clip = get_clip(pipe)
+    clip = pipe.text_encoder_2
     clip_to_text_embeddings = CLIPModelWrapper(clip)
 
     # Create random input (77 is the maximum length).
