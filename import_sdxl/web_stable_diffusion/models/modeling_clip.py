@@ -3,82 +3,82 @@ from typing import Optional, Tuple, Union
 import torch
 from .t_activations import ACT2FN
 
-# class BaseModelOutput():
-#     """
-#     Base class for model's outputs, with potential hidden states and attentions.
+class BaseModelOutput():
+    """
+    Base class for model's outputs, with potential hidden states and attentions.
 
-#     Args:
-#         last_hidden_state (`torch.FloatTensor` of shape `(batch_size, sequence_length, hidden_size)`):
-#             Sequence of hidden-states at the output of the last layer of the model.
-#         hidden_states (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`):
-#             Tuple of `torch.FloatTensor` (one for the output of the embeddings, if the model has an embedding layer, +
-#             one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.
+    Args:
+        last_hidden_state (`torch.FloatTensor` of shape `(batch_size, sequence_length, hidden_size)`):
+            Sequence of hidden-states at the output of the last layer of the model.
+        hidden_states (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`):
+            Tuple of `torch.FloatTensor` (one for the output of the embeddings, if the model has an embedding layer, +
+            one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.
 
-#             Hidden-states of the model at the output of each layer plus the optional initial embedding outputs.
-#         attentions (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True` is passed or when `config.output_attentions=True`):
-#             Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads, sequence_length,
-#             sequence_length)`.
+            Hidden-states of the model at the output of each layer plus the optional initial embedding outputs.
+        attentions (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True` is passed or when `config.output_attentions=True`):
+            Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads, sequence_length,
+            sequence_length)`.
 
-#             Attentions weights after the attention softmax, used to compute the weighted average in the self-attention
-#             heads.
-#     """
+            Attentions weights after the attention softmax, used to compute the weighted average in the self-attention
+            heads.
+    """
 
-#     last_hidden_state: torch.FloatTensor = None
-#     hidden_states: Optional[Tuple[torch.FloatTensor]] = None
-#     attentions: Optional[Tuple[torch.FloatTensor]] = None
+    last_hidden_state: torch.FloatTensor = None
+    hidden_states: Optional[Tuple[torch.FloatTensor]] = None
+    attentions: Optional[Tuple[torch.FloatTensor]] = None
 
-#     def __init__(self, last_hidden_state = None, hidden_states = None, attentions = None):
-#         self.last_hidden_state = last_hidden_state
-#         self.hidden_states = hidden_states
-#         self.attentions = attentions
+    def __init__(self, last_hidden_state = None, hidden_states = None, attentions = None):
+        self.last_hidden_state = last_hidden_state
+        self.hidden_states = hidden_states
+        self.attentions = attentions
 
-# class BaseModelOutputWithPooling():
-#     """
-#     Base class for model's outputs that also contains a pooling of the last hidden states.
+class BaseModelOutputWithPooling():
+    """
+    Base class for model's outputs that also contains a pooling of the last hidden states.
 
-#     Args:
-#         last_hidden_state (`torch.FloatTensor` of shape `(batch_size, sequence_length, hidden_size)`):
-#             Sequence of hidden-states at the output of the last layer of the model.
-#         pooler_output (`torch.FloatTensor` of shape `(batch_size, hidden_size)`):
-#             Last layer hidden-state of the first token of the sequence (classification token) after further processing
-#             through the layers used for the auxiliary pretraining task. E.g. for BERT-family of models, this returns
-#             the classification token after processing through a linear layer and a tanh activation function. The linear
-#             layer weights are trained from the next sentence prediction (classification) objective during pretraining.
-#         hidden_states (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`):
-#             Tuple of `torch.FloatTensor` (one for the output of the embeddings, if the model has an embedding layer, +
-#             one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.
+    Args:
+        last_hidden_state (`torch.FloatTensor` of shape `(batch_size, sequence_length, hidden_size)`):
+            Sequence of hidden-states at the output of the last layer of the model.
+        pooler_output (`torch.FloatTensor` of shape `(batch_size, hidden_size)`):
+            Last layer hidden-state of the first token of the sequence (classification token) after further processing
+            through the layers used for the auxiliary pretraining task. E.g. for BERT-family of models, this returns
+            the classification token after processing through a linear layer and a tanh activation function. The linear
+            layer weights are trained from the next sentence prediction (classification) objective during pretraining.
+        hidden_states (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`):
+            Tuple of `torch.FloatTensor` (one for the output of the embeddings, if the model has an embedding layer, +
+            one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.
 
-#             Hidden-states of the model at the output of each layer plus the optional initial embedding outputs.
-#         attentions (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True` is passed or when `config.output_attentions=True`):
-#             Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads, sequence_length,
-#             sequence_length)`.
+            Hidden-states of the model at the output of each layer plus the optional initial embedding outputs.
+        attentions (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True` is passed or when `config.output_attentions=True`):
+            Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads, sequence_length,
+            sequence_length)`.
 
-#             Attentions weights after the attention softmax, used to compute the weighted average in the self-attention
-#             heads.
-#     """
+            Attentions weights after the attention softmax, used to compute the weighted average in the self-attention
+            heads.
+    """
 
-#     last_hidden_state: torch.FloatTensor = None
-#     pooler_output: torch.FloatTensor = None
-#     hidden_states: Optional[Tuple[torch.FloatTensor]] = None
-#     attentions: Optional[Tuple[torch.FloatTensor]] = None
+    last_hidden_state: torch.FloatTensor = None
+    pooler_output: torch.FloatTensor = None
+    hidden_states: Optional[Tuple[torch.FloatTensor]] = None
+    attentions: Optional[Tuple[torch.FloatTensor]] = None
 
-#     def __init__(self, last_hidden_state = None, pooler_output = None, hidden_states = None, attentions = None):
-#         self.last_hidden_state = last_hidden_state
-#         self.pooler_output = pooler_output
-#         self.hidden_states = hidden_states
-#         self.attentions = attentions
+    def __init__(self, last_hidden_state = None, pooler_output = None, hidden_states = None, attentions = None):
+        self.last_hidden_state = last_hidden_state
+        self.pooler_output = pooler_output
+        self.hidden_states = hidden_states
+        self.attentions = attentions
 
-# class CLIPTextModelOutput():
-#     text_embeds: Optional[torch.FloatTensor] = None
-#     last_hidden_state: torch.FloatTensor = None
-#     hidden_states: Optional[Tuple[torch.FloatTensor]] = None
-#     attentions: Optional[Tuple[torch.FloatTensor]] = None
+class CLIPTextModelOutput():
+    text_embeds: Optional[torch.FloatTensor] = None
+    last_hidden_state: torch.FloatTensor = None
+    hidden_states: Optional[Tuple[torch.FloatTensor]] = None
+    attentions: Optional[Tuple[torch.FloatTensor]] = None
     
-#     def __init__(self, text_embeds = None, last_hidden_state = None, hidden_states = None, attentions = None):
-#         self.text_embeds = text_embeds
-#         self.last_hidden_state = last_hidden_state
-#         self.hidden_states = hidden_states
-#         self.attentions = attentions
+    def __init__(self, text_embeds = None, last_hidden_state = None, hidden_states = None, attentions = None):
+        self.text_embeds = text_embeds
+        self.last_hidden_state = last_hidden_state
+        self.hidden_states = hidden_states
+        self.attentions = attentions
 
 class CLIPTextEmbeddings(nn.Module):
     def __init__(self, config):
@@ -99,9 +99,7 @@ class CLIPTextEmbeddings(nn.Module):
         position_ids: Optional[torch.LongTensor] = None,
         inputs_embeds: Optional[torch.FloatTensor] = None,
     ) -> torch.Tensor:
-        # seq_length = input_ids.shape[-1] if input_ids is not None else inputs_embeds.shape[-2]
-        seq_length = 77
-
+        seq_length = input_ids.shape[-1] if input_ids is not None else inputs_embeds.shape[-2]
 
         if position_ids is None:
             position_ids = self.position_ids[:, :seq_length]
@@ -163,27 +161,27 @@ class CLIPAttention(nn.Module):
         src_len = key_states.size(1)
         attn_weights = torch.bmm(query_states, key_states.transpose(1, 2))
 
-        # if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
-        #     raise ValueError(
-        #         f"Attention weights should be of size {(bsz * self.num_heads, tgt_len, src_len)}, but is"
-        #         f" {attn_weights.size()}"
-        #     )
+        if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
+            raise ValueError(
+                f"Attention weights should be of size {(bsz * self.num_heads, tgt_len, src_len)}, but is"
+                f" {attn_weights.size()}"
+            )
 
         # apply the causal_attention_mask first
         if causal_attention_mask is not None:
-            # if causal_attention_mask.size() != (bsz, 1, tgt_len, src_len):
-            #     raise ValueError(
-            #         f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is"
-            #         f" {causal_attention_mask.size()}"
-            #     )
+            if causal_attention_mask.size() != (bsz, 1, tgt_len, src_len):
+                raise ValueError(
+                    f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is"
+                    f" {causal_attention_mask.size()}"
+                )
             attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + causal_attention_mask
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
         if attention_mask is not None:
-            # if attention_mask.size() != (bsz, 1, tgt_len, src_len):
-            #     raise ValueError(
-            #         f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is {attention_mask.size()}"
-            #     )
+            if attention_mask.size() != (bsz, 1, tgt_len, src_len):
+                raise ValueError(
+                    f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is {attention_mask.size()}"
+                )
             attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + attention_mask
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
@@ -203,11 +201,11 @@ class CLIPAttention(nn.Module):
 
         attn_output = torch.bmm(attn_probs, value_states)
 
-        # if attn_output.size() != (bsz * self.num_heads, tgt_len, self.head_dim):
-        #     raise ValueError(
-        #         f"`attn_output` should be of size {(bsz, self.num_heads, tgt_len, self.head_dim)}, but is"
-        #         f" {attn_output.size()}"
-        #     )
+        if attn_output.size() != (bsz * self.num_heads, tgt_len, self.head_dim):
+            raise ValueError(
+                f"`attn_output` should be of size {(bsz, self.num_heads, tgt_len, self.head_dim)}, but is"
+                f" {attn_output.size()}"
+            )
 
         attn_output = attn_output.view(bsz, self.num_heads, tgt_len, self.head_dim)
         attn_output = attn_output.transpose(1, 2)
@@ -224,13 +222,8 @@ def _make_causal_mask(
     Make causal mask used for bi-directional self-attention.
     """
     bsz, tgt_len = input_ids_shape
-    magic_dtype = torch.float32
-    magic_device = torch.device("cpu")
-    magic_tgt_len = 77
-    # mask = torch.full((tgt_len, tgt_len), torch.finfo(dtype).min, device=device)
-    mask = torch.full((magic_tgt_len, magic_tgt_len), torch.finfo(magic_dtype).min, device=magic_device)
-    # mask_cond = torch.arange(mask.size(-1), device=device)
-    mask_cond = torch.arange(mask.size(-1), device=magic_device)
+    mask = torch.full((tgt_len, tgt_len), torch.finfo(dtype).min, device=device)
+    mask_cond = torch.arange(mask.size(-1), device=device)
     mask.masked_fill_(mask_cond < (mask_cond + 1).view(mask.size(-1), 1), 0)
     mask = mask.to(dtype)
 
@@ -248,8 +241,6 @@ def _expand_mask(mask: torch.Tensor, dtype: torch.dtype, tgt_len: Optional[int] 
     expanded_mask = mask[:, None, None, :].expand(bsz, 1, tgt_len, src_len).to(dtype)
 
     inverted_mask = 1.0 - expanded_mask
-    print("dtype here:")
-    print(dtype)
 
     return inverted_mask.masked_fill(inverted_mask.to(torch.bool), torch.finfo(dtype).min)
 
@@ -340,7 +331,7 @@ class CLIPEncoder(nn.Module):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
-    ):
+    ) -> Union[Tuple, BaseModelOutput]:
         r"""
         Args:
             inputs_embeds (`torch.FloatTensor` of shape `(batch_size, sequence_length, hidden_size)`):
@@ -376,16 +367,13 @@ class CLIPEncoder(nn.Module):
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        # encoder_states = () if output_hidden_states else None
-        # all_attentions = () if output_attentions else None
-        encoder_states = ()
-        all_attentions = ()
+        encoder_states = () if output_hidden_states else None
+        all_attentions = () if output_attentions else None
 
         hidden_states = inputs_embeds
         for idx, encoder_layer in enumerate(self.layers):
-            # if output_hidden_states:
-            #     encoder_states = encoder_states + (hidden_states,)
-            encoder_states = encoder_states + (hidden_states,)
+            if output_hidden_states:
+                encoder_states = encoder_states + (hidden_states,)
             if self.gradient_checkpointing and self.training:
 
                 def create_custom_forward(module):
@@ -413,13 +401,14 @@ class CLIPEncoder(nn.Module):
             if output_attentions:
                 all_attentions = all_attentions + (layer_outputs[1],)
 
-        # if output_hidden_states:
-        #     encoder_states = encoder_states + (hidden_states,)
-        encoder_states = encoder_states + (hidden_states,)
+        if output_hidden_states:
+            encoder_states = encoder_states + (hidden_states,)
 
         if not return_dict:
             return tuple(v for v in [hidden_states, encoder_states, all_attentions] if v is not None)
-        return (hidden_states, encoder_states, all_attentions)
+        return BaseModelOutput(
+            last_hidden_state=hidden_states, hidden_states=encoder_states, attentions=all_attentions
+        )
 
 class CLIPTextTransformer(nn.Module):
     def __init__(self, config):
@@ -440,7 +429,7 @@ class CLIPTextTransformer(nn.Module):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
-    ):
+    ) -> Union[Tuple, BaseModelOutputWithPooling]:
         r"""
         Returns:
 
@@ -468,9 +457,9 @@ class CLIPTextTransformer(nn.Module):
         # https://github.com/openai/CLIP/blob/cfcffb90e69f37bf2ff1e988237a0fbe41f33c04/clip/model.py#L324
         causal_attention_mask = _make_causal_mask(input_shape, hidden_states.dtype, device=hidden_states.device)
         # expand attention_mask
-        # if attention_mask is not None:
-        #     # [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
-        #     attention_mask = _expand_mask(attention_mask, hidden_states.dtype)
+        if attention_mask is not None:
+            # [bsz, seq_len] -> [bsz, 1, tgt_seq_len, src_seq_len]
+            attention_mask = _expand_mask(attention_mask, hidden_states.dtype)
 
         encoder_outputs = self.encoder(
             inputs_embeds=hidden_states,
@@ -481,46 +470,29 @@ class CLIPTextTransformer(nn.Module):
             return_dict=return_dict,
         )
 
-        last_hidden_state = encoder_outputs[0]
+        last_hidden_state = encoder_outputs.last_hidden_state
         last_hidden_state = self.final_layer_norm(last_hidden_state)
 
         # text_embeds.shape = [batch_size, sequence_length, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)
         # casting to torch.int for onnx compatibility: argmax doesn't support int64 inputs with opset 14
-        magical_shape = 1
-        magical_device = torch.device("cpu")
-        # pooled_output = last_hidden_state[
-        #     torch.arange(magical_shape, device=magical_device),
-        #     input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1),
-        # ]
-
-        temp_out = last_hidden_state.reshape((77, 1280))
-        pooled_output = temp_out[[0]]
-        pooled_output = pooled_output.reshape((1, 1, 1280))
-
-
-        # # won't work
-        # pooled_output = last_hidden_state[0][0]
-        # print("step2")
-        # pooled_output = pooled_output.reshape((1, 1, 1280))
-        # print("pooled_output.shape", pooled_output.shape)
-
         # pooled_output = last_hidden_state[
         #     torch.arange(last_hidden_state.shape[0], device=last_hidden_state.device),
         #     input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1),
         # ]
+        temp_out = last_hidden_state.reshape((77, 1280))
+        pooled_output = temp_out[[0]]
+        pooled_output = pooled_output.reshape((1, 1, 1280))
 
-        return (last_hidden_state, pooled_output) + encoder_outputs[1:]
+        if not return_dict:
+            return (last_hidden_state, pooled_output) + encoder_outputs[1:]
 
-        # if not return_dict:
-        #     return (last_hidden_state, pooled_output) + encoder_outputs[1:]
-
-        # return BaseModelOutputWithPooling(
-        #     last_hidden_state=last_hidden_state,
-        #     pooler_output=pooled_output,
-        #     hidden_states=encoder_outputs.hidden_states,
-        #     attentions=encoder_outputs.attentions,
-        # )
+        return BaseModelOutputWithPooling(
+            last_hidden_state=last_hidden_state,
+            pooler_output=pooled_output,
+            hidden_states=encoder_outputs.hidden_states,
+            attentions=encoder_outputs.attentions,
+        )
 
 class CLIPTextModelWithProjection(nn.Module):
     # config_class = CLIPTextConfig
@@ -553,7 +525,7 @@ class CLIPTextModelWithProjection(nn.Module):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
-    ):
+    ) -> Union[Tuple, CLIPTextModelOutput]:
         r"""
         Returns:
 
@@ -582,20 +554,17 @@ class CLIPTextModelWithProjection(nn.Module):
             return_dict=return_dict,
         )
 
-        pooled_output = text_outputs[1]
+        pooled_output = text_outputs.pooler_output
 
         text_embeds = self.text_projection(pooled_output)
 
         if not return_dict:
             outputs = (text_embeds, text_outputs[0]) + text_outputs[2:]
             return tuple(output for output in outputs if output is not None)
-        
-        outputs = (text_embeds, text_outputs[0]) + text_outputs[2:]
-        return tuple(output for output in outputs if output is not None)
 
-        # return CLIPTextModelOutput(
-        #     text_embeds=text_embeds,
-        #     last_hidden_state=text_outputs.last_hidden_state,
-        #     hidden_states=text_outputs.hidden_states,
-        #     attentions=text_outputs.attentions,
-        # )
+        return CLIPTextModelOutput(
+            text_embeds=text_embeds,
+            last_hidden_state=text_outputs.last_hidden_state,
+            hidden_states=text_outputs.hidden_states,
+            attentions=text_outputs.attentions,
+        )
