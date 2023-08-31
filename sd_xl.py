@@ -5,7 +5,7 @@ from diffusers import DiffusionPipeline
 import torch
 
 pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
-pipe.to("mps")
+pipe.to("cuda")
 
 # if using torch < 2.0
 # pipe.enable_xformers_memory_efficient_attention()
@@ -38,7 +38,7 @@ pre.save('pre.jpg')
 
 
 pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-refiner-1.0")
-pipe.to("mps")
+pipe.to("cuda")
 
 # if using torch < 2.0
 # pipe.enable_xformers_memory_efficient_attention()

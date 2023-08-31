@@ -54,40 +54,40 @@ vae = vae_to_image(pipe)
 
 print("successful import")
 
-#our random input
-input = torch.rand((1, 4, 64, 64)).to(torch.float32)
+# #our random input
+# input = torch.rand((1, 4, 64, 64)).to(torch.float32)
 
-target = tvm.target.Target("cuda")
-device = tvm.cuda()
+# target = tvm.target.Target("cuda")
+# device = tvm.cuda()
 
-input_nd = tvm.nd.array(input, device=device)
-
-
-#our result
-print("our result")
+# input_nd = tvm.nd.array(input, device=device)
 
 
-from tvm import meta_schedule as ms
-# db = ms.database.create(work_dir="scale_db")
+# #our result
+# print("our result")
 
 
-with target, tvm.transform.PassContext(opt_level=3):
-    # clip = relax.transform.MetaScheduleApplyDatabase()(clip)
-    vae = tvm.tir.transform.DefaultGPUSchedule()(vae)
-ex = relax.build(vae, target= target)
-vm = relax.VirtualMachine(ex, device)
-
-nd_res1 = vm["vae"](input_nd).numpy()
-
-print(nd_res1)
-print(nd_res1.shape)
+# from tvm import meta_schedule as ms
+# # db = ms.database.create(work_dir="scale_db")
 
 
-#ref result
-print("ref result")
+# with target, tvm.transform.PassContext(opt_level=3):
+#     # clip = relax.transform.MetaScheduleApplyDatabase()(clip)
+#     vae = tvm.tir.transform.DefaultGPUSchedule()(vae)
+# ex = relax.build(vae, target= target)
+# vm = relax.VirtualMachine(ex, device)
 
-ref_result = pipe.vae.decode(input)[0].numpy()
+# nd_res1 = vm["vae"](input_nd).numpy()
 
-import numpy as np
-np.testing.assert_array_equal(nd_res1, ref_result)
-print("test passed")
+# print(nd_res1)
+# print(nd_res1.shape)
+
+
+# #ref result
+# print("ref result")
+
+# ref_result = pipe.vae.decode(input)[0].numpy()
+
+# import numpy as np
+# np.testing.assert_array_equal(nd_res1, ref_result)
+# print("test passed")
