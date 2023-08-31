@@ -7,6 +7,7 @@ from tvm import relax
 
 from .models.unet_2d_condition import TVMUNet2DConditionModel
 from .models.autoencoder_kl import AutoencoderKL
+from .models.modeling_clip import CLIPTextModelWithProjection
 
 
 def detect_available_torch_device() -> str:
@@ -206,3 +207,32 @@ def get_vae(
     #     model_dict[name] = tensor
     model.load_state_dict(pipe.vae.state_dict())
     return model
+
+def get_clip(pipe):
+    class config():
+        attention_dropout = 0.0
+        bos_token_id = 0
+        dropout = 0.0
+        eos_token_id = 2
+        hidden_act = "gelu"
+        hidden_size = 1280
+        initializer_factor = 1.0
+        initializer_range = 0.02
+        intermediate_size = 5120
+        layer_norm_eps = 1e-05
+        max_position_embeddings = 77
+        model_type = "clip_text_model"
+        num_attention_heads = 20
+        num_hidden_layers = 32
+        pad_token_id = 1
+        projection_dim = 1280
+        torch_dtype = "float16"
+        transformers_version = "4.32.0.dev0"
+        vocab_size = 49408
+    
+    config = config()
+    model = CLIPTextModelWithProjection(config)
+    model.load_state_dict(pipe.text_encoder_2.state_dict())
+    return model
+
+    

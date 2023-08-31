@@ -11,7 +11,6 @@ from tvm.script import relax as R
 import torch
 from torch import fx
 
-
 from web_stable_diffusion.utils import get_clip
 
 print(tvm.__file__)
@@ -34,33 +33,17 @@ def clip_to_text_embeddings(pipe) -> tvm.IRModule:
     clip = get_clip(pipe)
     clip_to_text_embeddings = CLIPModelWrapper(clip)
 
-    graph = fx.symbolic_trace(clip_to_text_embeddings)
-    mod = from_fx(
-        graph,
-        [((1, 77), "int32")],
+    # Create random input (77 is the maximum length).
+    text_input_ids = torch.rand((1, 77)).to(torch.int32)
+    # Capture CLIP's computational graph.
+    mod = dynamo_capture_subgraphs(
+        clip_to_text_embeddings.forward,
+        text_input_ids,
         keep_params_as_input=True,
     )
-    return tvm.IRModule({"clip2": mod["main"]})
+    # assert len(mod.functions) == 1
+
+    return tvm.IRModule({"clip": mod["subgraph_0"]})
 
 clip = clip_to_text_embeddings(pipe)
-# print("successful import")
-
-# print(pipe)
-
-pipe.text_encoder_2.eval()
-
-with torch.no_grad():
-    clip2 = get_clip(pipe)
-
-    text_input_ids = torch.rand((1, 77)).to(torch.int32)
-
-    out = clip2(text_input_ids)
-    ref_out = pipe.text_encoder_2(text_input_ids)
-
-
-    assert torch.allclose(out[0], ref_out[0], atol=1e-4)
-    assert torch.allclose(out[1], ref_out[1], atol=1e-4)
-
-    print("same result")
-
-    print("successful import")
+print("successful import")

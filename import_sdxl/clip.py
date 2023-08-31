@@ -77,8 +77,9 @@ input = torch.rand((1, 77)).to(torch.int32)
 # print(nd_res1.shape)
 
 
-#ref result
-print("ref result")
+# #ref result
+# print("ref result")
+
 
 ref_result = pipe.text_encoder(input, output_hidden_states=True)
 
