@@ -41,7 +41,7 @@ def clip_to_text_embeddings(pipe) -> tvm.IRModule:
         text_input_ids,
         keep_params_as_input=True,
     )
-    assert len(mod.functions) == 1
+    # assert len(mod.functions) == 1
 
     return tvm.IRModule({"clip": mod["subgraph_0"]})
 

@@ -489,10 +489,22 @@ class CLIPTextTransformer(nn.Module):
         # casting to torch.int for onnx compatibility: argmax doesn't support int64 inputs with opset 14
         magical_shape = 1
         magical_device = torch.device("cpu")
-        pooled_output = last_hidden_state[
-            torch.arange(magical_shape, device=magical_device),
-            input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1),
-        ]
+        # pooled_output = last_hidden_state[
+        #     torch.arange(magical_shape, device=magical_device),
+        #     input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1),
+        # ]
+
+        temp_out = last_hidden_state.reshape((77, 1280))
+        pooled_output = temp_out[[0]]
+        pooled_output = pooled_output.reshape((1, 1, 1280))
+
+
+        # # won't work
+        # pooled_output = last_hidden_state[0][0]
+        # print("step2")
+        # pooled_output = pooled_output.reshape((1, 1, 1280))
+        # print("pooled_output.shape", pooled_output.shape)
+
         # pooled_output = last_hidden_state[
         #     torch.arange(last_hidden_state.shape[0], device=last_hidden_state.device),
         #     input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1),
