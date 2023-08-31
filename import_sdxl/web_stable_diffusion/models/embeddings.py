@@ -76,7 +76,7 @@ def get_timestep_embedding(
     downscale_freq_shift: float = 1,
     scale: float = 1,
     max_period: int = 10000,
-    device = torch.device("mps"),
+    device = torch.device("cpu"),
 ):
     """
     This matches the implementation in Denoising Diffusion Probabilistic Models: Create sinusoidal timestep embeddings.
