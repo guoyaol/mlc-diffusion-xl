@@ -79,3 +79,6 @@ with torch.no_grad():
     print("ref out")
     ref_out = pipe.text_encoder_2(text_input_ids)
     print(ref_out)
+
+    print("ref out 0")
+    print(ref_out[0])
