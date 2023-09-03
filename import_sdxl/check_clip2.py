@@ -70,7 +70,7 @@ with torch.no_grad():
     out = clip2(text_input_ids)
     print(out)
     print("text embeds")
-    print(out.text_embeds)
+    print(out.text_embeds[0])
     print("last_hidden_state")
     print(out.last_hidden_state)
 
