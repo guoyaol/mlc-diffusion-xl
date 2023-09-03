@@ -92,6 +92,7 @@ class TVMSDPipeline:
         self.unet_latents_to_noise_pred = wrapper(vm["unet"], param_dict["unet"])
         self.vae_to_image = wrapper(vm["vae"], param_dict["vae"])
         self.concat_embeddings = vm["concat_embeddings"]
+        self.concat_pool_embeddings = vm["concat_pool_embeddings"]
         self.concat_enocder_outputs = vm["concat_enocder_outputs"]
         self.image_to_rgba = vm["image_to_rgba"]
         self.tokenizer = tokenizer
@@ -134,10 +135,32 @@ class TVMSDPipeline:
             prompt_embeds_list.append(text_embeddings)
         
         prompt_embeds = self.concat_enocder_outputs(prompt_embeds_list[0], prompt_embeds_list[1])
-        print(prompt_embeds.shape)
-        print(pooled_prompt_embeds.shape)
 
-        
+        neg_prompt_embeds_list = []
+        for tokenizer, text_encoder in zip(tokenizers, text_encoders):
+            neg_text_inputs = tokenizer(
+                    negative_prompt,
+                    padding="max_length",
+                    max_length=tokenizer.model_max_length,
+                    truncation=True,
+                    return_tensors="pt",
+                )
+            neg_text_input_ids = neg_text_inputs.input_ids.to(torch.int32)
+            if neg_text_input_ids.shape[-1] > self.tokenizer.model_max_length:
+                neg_text_input_ids = neg_text_input_ids[:, : self.tokenizer.model_max_length]
+            neg_text_input_ids = tvm.nd.array(neg_text_input_ids.cpu().numpy(), self.tvm_device)
+            neg_clip_output = text_encoder(neg_text_input_ids)
+            neg_text_embeddings = neg_clip_output[0]
+            neg_pooled_prompt_embeds = neg_clip_output[1]
+            neg_prompt_embeds_list.append(neg_text_embeddings)
+
+        neg_prompt_embeds = self.concat_enocder_outputs(neg_prompt_embeds_list[0], neg_prompt_embeds_list[1])
+            
+        add_text_embeds = self.concat_pool_embeddings(neg_pooled_prompt_embeds, pooled_prompt_embeds)
+        input_text_embeddings = self.concat_embeddings(neg_prompt_embeds, prompt_embeds)
+
+        print(input_text_embeddings.shape)
+        print(add_text_embeds.shape)
 
         #TODO: check correct, fold into TVM
         add_time_ids = torch.tensor([[1024., 1024., 0., 0., 1024., 1024.],[1024., 1024., 0., 0., 1024., 1024.]], dtype=torch.float32)
@@ -157,7 +180,7 @@ class TVMSDPipeline:
             #TODO: add this
             #latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
             t = self.scheduler.timesteps[i]
-            noise_pred = self.unet_latents_to_noise_pred(latents, t, text_embeddings, add_text_embeds, add_time_ids)
+            noise_pred = self.unet_latents_to_noise_pred(latents, t, input_text_embeddings, add_text_embeds, add_time_ids)
             latents = self.scheduler.step(self.vm, noise_pred, latents, i)
 
         # VAE decode.
