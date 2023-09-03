@@ -92,6 +92,7 @@ class TVMSDPipeline:
         self.unet_latents_to_noise_pred = wrapper(vm["unet"], param_dict["unet"])
         self.vae_to_image = wrapper(vm["vae"], param_dict["vae"])
         self.concat_embeddings = vm["concat_embeddings"]
+        self.concat_enocder_outputs = vm["concat_enocder_outputs"]
         self.image_to_rgba = vm["image_to_rgba"]
         self.tokenizer = tokenizer
         self.tokenizer2 = tokenizer2
@@ -132,9 +133,11 @@ class TVMSDPipeline:
 
             prompt_embeds_list.append(text_embeddings)
         
-        prompt_embeds = torch.concat(prompt_embeds_list, dim=-1)
+        prompt_embeds = self.concat_enocder_outputs(prompt_embeds_list[0], prompt_embeds_list[1])
         print(prompt_embeds.shape)
-        text_embeddings = tvm.nd.array(prompt_embeds.numpy(), self.tvm_device)
+        print(pooled_prompt_embeds.shape)
+
+        
 
         #TODO: check correct, fold into TVM
         add_time_ids = torch.tensor([[1024., 1024., 0., 0., 1024., 1024.],[1024., 1024., 0., 0., 1024., 1024.]], dtype=torch.float32)
