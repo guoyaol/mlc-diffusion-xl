@@ -181,6 +181,7 @@ class TVMSDPipeline:
             #latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
             t = self.scheduler.timesteps[i]
             noise_pred = self.unet_latents_to_noise_pred(latents, t, input_text_embeddings, add_text_embeds, add_time_ids)
+            print("noise_pred shape: ", noise_pred.shape)
             latents = self.scheduler.step(self.vm, noise_pred, latents, i)
 
         # VAE decode.
@@ -208,5 +209,7 @@ prompt = "Jellyfish floating in a forest"
 start = time.time()
 image = pipe(prompt)
 end = time.time()
+
+image.save('jellyfish.png')
 
 print(f"Time elapsed: {end - start} seconds.")
