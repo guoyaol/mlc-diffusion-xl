@@ -113,6 +113,7 @@ class TVMSDPipeline:
         prompt_embeds_list = []
 
         #prompt
+        count = 0
         for tokenizer, text_encoder in zip(tokenizers, text_encoders):
             text_inputs = tokenizer(
                     prompt,
@@ -121,10 +122,20 @@ class TVMSDPipeline:
                     truncation=True,
                     return_tensors="pt",
                 )
-            text_input_ids = text_inputs.input_ids.to(torch.int32)
+            
+            if count==1:
+                our_out = text_inputs.input_ids
+                for i in range(text_inputs.attention_mask.shape[1]):
+                    if text_inputs.attention_mask[0][i] == 0:
+                        our_out[0][i] = 0
+                text_input_ids = our_out.to(torch.int32)
+            else:
+                text_input_ids = text_inputs.input_ids.to(torch.int32)
+            count+=1
             # Clip the text if the length exceeds the maximum allowed length.
             if text_input_ids.shape[-1] > self.tokenizer.model_max_length:
                 text_input_ids = text_input_ids[:, : self.tokenizer.model_max_length]
+            
 
             # Compute text embeddings.
             text_input_ids = tvm.nd.array(text_input_ids.cpu().numpy(), self.tvm_device)
@@ -136,25 +147,38 @@ class TVMSDPipeline:
         
         prompt_embeds = self.concat_enocder_outputs(prompt_embeds_list[0], prompt_embeds_list[1])
 
-        neg_prompt_embeds_list = []
-        for tokenizer, text_encoder in zip(tokenizers, text_encoders):
-            neg_text_inputs = tokenizer(
-                    negative_prompt,
-                    padding="max_length",
-                    max_length=tokenizer.model_max_length,
-                    truncation=True,
-                    return_tensors="pt",
-                )
-            neg_text_input_ids = neg_text_inputs.input_ids.to(torch.int32)
-            if neg_text_input_ids.shape[-1] > self.tokenizer.model_max_length:
-                neg_text_input_ids = neg_text_input_ids[:, : self.tokenizer.model_max_length]
-            neg_text_input_ids = tvm.nd.array(neg_text_input_ids.cpu().numpy(), self.tvm_device)
-            neg_clip_output = text_encoder(neg_text_input_ids)
-            neg_text_embeddings = neg_clip_output[0]
-            neg_pooled_prompt_embeds = neg_clip_output[1]
-            neg_prompt_embeds_list.append(neg_text_embeddings)
+        if negative_prompt != "":
+            neg_prompt_embeds_list = []
+            for tokenizer, text_encoder in zip(tokenizers, text_encoders):
+                neg_text_inputs = tokenizer(
+                        negative_prompt,
+                        padding="max_length",
+                        max_length=tokenizer.model_max_length,
+                        truncation=True,
+                        return_tensors="pt",
+                    )
+                neg_text_input_ids = neg_text_inputs.input_ids.to(torch.int32)
+                if neg_text_input_ids.shape[-1] > self.tokenizer.model_max_length:
+                    neg_text_input_ids = neg_text_input_ids[:, : self.tokenizer.model_max_length]
+                neg_text_input_ids = tvm.nd.array(neg_text_input_ids.cpu().numpy(), self.tvm_device)
+                neg_clip_output = text_encoder(neg_text_input_ids)
+                neg_text_embeddings = neg_clip_output[0]
+                neg_pooled_prompt_embeds = neg_clip_output[1]
+                neg_prompt_embeds_list.append(neg_text_embeddings)
 
-        neg_prompt_embeds = self.concat_enocder_outputs(neg_prompt_embeds_list[0], neg_prompt_embeds_list[1])
+            neg_prompt_embeds = self.concat_enocder_outputs(neg_prompt_embeds_list[0], neg_prompt_embeds_list[1])
+        else:
+            torch_template = torch.from_numpy(prompt_embeds.asnumpy())
+            neg_prompt_embeds = torch.zeros_like(torch_template)
+            neg_prompt_embeds = tvm.nd.array(neg_prompt_embeds, self.tvm_device)
+
+            torch_template_pooled = torch.from_numpy(pooled_prompt_embeds.asnumpy())
+            neg_pooled_prompt_embeds = torch.zeros_like(torch_template_pooled)
+            neg_pooled_prompt_embeds = tvm.nd.array(neg_pooled_prompt_embeds, self.tvm_device)
+
+
+        print("prompt_embeds", prompt_embeds)
+        print("neg_prompt_embeds", neg_prompt_embeds)
             
         add_text_embeds = self.concat_pool_embeddings(neg_pooled_prompt_embeds, pooled_prompt_embeds)
         input_text_embeddings = self.concat_embeddings(neg_prompt_embeds, prompt_embeds)
@@ -190,7 +214,8 @@ class TVMSDPipeline:
         # Transform generated image to RGBA mode.
         image = self.image_to_rgba(image)
         return Image.fromarray(image.numpy().view("uint8").reshape(1024, 1024, 4))
-    
+
+torch.manual_seed(42)    
 
 pipe = TVMSDPipeline(
     vm=vm,
@@ -204,7 +229,7 @@ pipe = TVMSDPipeline(
 
 import time
 
-prompt = "Jellyfish floating in a forest"
+prompt = "a beautiful girl floating in galaxy"
 
 start = time.time()
 image = pipe(prompt)
