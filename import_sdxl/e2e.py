@@ -177,14 +177,12 @@ class TVMSDPipeline:
             neg_pooled_prompt_embeds = tvm.nd.array(neg_pooled_prompt_embeds, self.tvm_device)
 
 
-        print("prompt_embeds", prompt_embeds)
-        print("neg_prompt_embeds", neg_prompt_embeds)
             
         add_text_embeds = self.concat_pool_embeddings(neg_pooled_prompt_embeds, pooled_prompt_embeds)
         input_text_embeddings = self.concat_embeddings(neg_prompt_embeds, prompt_embeds)
 
-        print(input_text_embeddings.shape)
-        print(add_text_embeds.shape)
+        print("add_text_embeds", add_text_embeds)
+        print("input_text_embeddings", input_text_embeddings)
 
         #TODO: check correct, fold into TVM
         add_time_ids = torch.tensor([[1024., 1024., 0., 0., 1024., 1024.],[1024., 1024., 0., 0., 1024., 1024.]], dtype=torch.float32)
