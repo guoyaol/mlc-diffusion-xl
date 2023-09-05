@@ -44,7 +44,7 @@ def vae_to_image(pipe) -> tvm.IRModule:
     graph = fx.symbolic_trace(vae_to_image)
     mod = from_fx(
         graph,
-        [((1, 4, 64, 64), "float32")],
+        [((1, 4, 128, 128), "float32")],
         keep_params_as_input=True,
     )
     return tvm.IRModule({"vae": mod["main"]})
