@@ -89,6 +89,7 @@ for i in range(text_inputs.attention_mask.shape[1]):
 
 # input = torch.rand((1, 77)).to(torch.int32)
 text_input_ids = our_out.to(torch.int32)
+print(text_input_ids)
 
 with torch.no_grad():
     clip2 = get_clip(pipe)

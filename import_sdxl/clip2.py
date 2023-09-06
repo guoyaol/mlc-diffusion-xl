@@ -31,9 +31,42 @@ def clip_to_text_embeddings2(pipe) -> tvm.IRModule:
             text_embeddings = result.hidden_states[-2]
             pool_text_embeddings = result.text_embeds.squeeze(1)
             return text_embeddings, pool_text_embeddings
+        
+    from transformers import CLIPTokenizer
+    from diffusers import DiffusionPipeline
+
+    tokenizer=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
+
+    prompt = "a beautiful girl floating in galaxy"
+
+    text_inputs = tokenizer(
+            prompt,
+            padding="max_length",
+            max_length=tokenizer.model_max_length,
+            truncation=True,
+            return_tensors="pt",
+        )
+
+    print("our result")
+    our_out = text_inputs.input_ids
+
+    for i in range(text_inputs.attention_mask.shape[1]):
+        if text_inputs.attention_mask[0][i] == 0:
+            our_out[0][i] = 0
+
+
+    # input = torch.rand((1, 77)).to(torch.int32)
+    input = our_out.to(torch.int32)
+
 
     clip = get_clip(pipe)
     clip_to_text_embeddings = CLIPModelWrapper(clip)
+
+    clip_to_text_embeddings.eval()
+    with torch.no_grad():
+        out = clip_to_text_embeddings(input)
+
+    print(out)
 
     # Create random input (77 is the maximum length).
     text_input_ids = torch.rand((1, 77)).to(torch.int32)
