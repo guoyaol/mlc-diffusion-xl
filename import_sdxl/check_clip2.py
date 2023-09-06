@@ -11,6 +11,11 @@ from tvm.script import relax as R
 import torch
 from torch import fx
 
+from transformers import CLIPTokenizer
+from diffusers import DiffusionPipeline
+
+tokenizer=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
+
 print(tvm.__file__)
 
 #TODO: support fp16
@@ -69,16 +74,16 @@ with torch.no_grad():
     print("our out")
     out = clip2(text_input_ids)
     print(out)
-    print("text embeds")
+    print("our pool")
     print(out.text_embeds.squeeze(1))
-    print("last_hidden_state")
-    print(out.last_hidden_state)
+    print("our embd")
+    print(out.hidden_states[-2])
 
 
 
-    print("ref out")
-    ref_out = pipe.text_encoder_2(text_input_ids)
-    print(ref_out)
+    print("ref embd")
+    ref_out = pipe.text_encoder_2(text_input_ids, output_hidden_states=True)
+    print(ref_out.hidden_states[-2])
 
-    print("ref out 0")
+    print("ref pool")
     print(ref_out[0])
