@@ -65,10 +65,35 @@ pipe.text_encoder_2.eval()
 
 from web_stable_diffusion.utils import get_clip
 
+
+
+tokenizer=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
+
+prompt = "a beautiful girl floating in galaxy"
+
+text_inputs = tokenizer(
+        prompt,
+        padding="max_length",
+        max_length=tokenizer.model_max_length,
+        truncation=True,
+        return_tensors="pt",
+    )
+
+print("our result")
+our_out = text_inputs.input_ids
+
+for i in range(text_inputs.attention_mask.shape[1]):
+    if text_inputs.attention_mask[0][i] == 0:
+        our_out[0][i] = 0
+
+
+# input = torch.rand((1, 77)).to(torch.int32)
+text_input_ids = our_out.to(torch.int32)
+
 with torch.no_grad():
     clip2 = get_clip(pipe)
 
-    text_input_ids = torch.rand((1, 77)).to(torch.int32)
+    # text_input_ids = torch.rand((1, 77)).to(torch.int32)
 
 
     print("our out")
