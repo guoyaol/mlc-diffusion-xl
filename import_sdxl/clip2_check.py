@@ -3,6 +3,10 @@ from web_stable_diffusion import utils
 from tvm import relax
 import torch
 from diffusers import DiffusionPipeline
+from transformers import CLIPTokenizer
+from diffusers import DiffusionPipeline
+
+tokenizer=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
 
 target = tvm.target.Target("cuda")
 device = tvm.cuda()
@@ -22,7 +26,27 @@ clip = wrapper(vm["clip2"], const_params_dict["clip2"])
 
 
 # start test
-input = torch.rand((1, 77)).to(torch.int32)
+prompt = "a beautiful girl floating in galaxy"
+
+text_inputs = tokenizer(
+        prompt,
+        padding="max_length",
+        max_length=tokenizer.model_max_length,
+        truncation=True,
+        return_tensors="pt",
+    )
+
+print("our result")
+our_out = text_inputs.input_ids
+
+for i in range(text_inputs.attention_mask.shape[1]):
+    if text_inputs.attention_mask[0][i] == 0:
+        our_out[0][i] = 0
+
+print(our_out)
+
+# input = torch.rand((1, 77)).to(torch.int32)
+input = our_out.to(torch.int32)
 
 target = tvm.target.Target("cuda")
 device = tvm.cuda()
