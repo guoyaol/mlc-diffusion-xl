@@ -20,7 +20,7 @@ def vae_to_image(pipe) -> tvm.IRModule:
 
         def forward(self, latents):
             # Scale the latents so that it can be decoded by VAE.
-            latents = 1 / 0.18215 * latents
+            latents = 1 / 0.13025 * latents
             # VAE decode
             z = self.vae.post_quant_conv(latents)
             image = self.vae.decoder(z)
