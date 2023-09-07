@@ -24,7 +24,7 @@ def unet_latents_to_noise_pred(pipe, device_str: str) -> tvm.IRModule:
             super().__init__()
             self.unet = unet
             # Default guidance scale factor in stable diffusion.
-            self.guidance_scale = 7.5
+            self.guidance_scale = 5.0
 
         def forward(self, latents, timestep_tensor, text_embeddings, added_cond_kwargs_text_embeds, added_cond_kwargs_text_time_ids):
             # Latent concatenation.
