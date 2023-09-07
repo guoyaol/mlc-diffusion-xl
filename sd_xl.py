@@ -3,6 +3,7 @@
 
 from diffusers import DiffusionPipeline
 import torch
+torch.manual_seed(42)
 
 pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 pipe.to("cuda")
