@@ -15,7 +15,14 @@ text_inputs = tokenizer(
     )
 
 print("our result")
-print(text_inputs.input_ids)
+our_out = text_inputs.input_ids
+
+for i in range(text_inputs.attention_mask.shape[1]):
+    if text_inputs.attention_mask[0][i] == 0:
+        our_out[0][i] = 0
+
+print(our_out)
+
 
 
 pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
@@ -34,6 +41,6 @@ ref2 = pipe.tokenizer_2(prompt,
         max_length=tokenizer.model_max_length,
         truncation=True,
         return_tensors="pt",)
-print(ref2)
+print(ref2.input_ids)
 
 
