@@ -18,7 +18,7 @@ vm = relax.VirtualMachine(rt_mod=ex, device=device)
 
 def wrapper(f, params):
     def wrapped_f(*args):
-        return f(*args, params)
+        return f(*args, *params)
 
     return wrapped_f
 
