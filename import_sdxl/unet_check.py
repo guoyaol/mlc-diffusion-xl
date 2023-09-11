@@ -4,7 +4,6 @@ from tvm import relax
 import torch
 from diffusers import DiffusionPipeline
 from transformers import CLIPTokenizer
-from diffusers import DiffusionPipeline
 
 tokenizer=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
 
@@ -18,7 +17,7 @@ vm = relax.VirtualMachine(rt_mod=ex, device=device)
 
 def wrapper(f, params):
     def wrapped_f(*args):
-        return f(*args, params)
+        return f(*args, *params)
 
     return wrapped_f
 
@@ -29,6 +28,7 @@ unet = wrapper(vm["unet"], const_params_dict["unet"])
 
 # our_inputs = torch.rand((1, 3, 64, 64)).to(torch.float32)
 
+torch.manual_seed(42)
 input1 = torch.rand((1, 4, 128, 128)).to(torch.float32)
 input2 = torch.tensor(3).to(torch.int32)
 input3 = torch.rand((2, 77, 2048)).to(torch.float32)
