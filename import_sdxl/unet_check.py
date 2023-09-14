@@ -49,9 +49,10 @@ print("our result")
 
 
 nd_res1 = unet(input1_nd, input2_nd, input3_nd, input4_nd, input5_nd)
+our_out = nd_res1.numpy()
 
 
-print(nd_res1)
+print(our_out)
 
 
 
@@ -77,26 +78,18 @@ class UNetModelWrapper(torch.nn.Module):
 device_str = "cpu"
 pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 
-unet = utils.get_unet(pipe, device_str)
-unet.eval()
-unet_to_noise_pred = UNetModelWrapper(unet)
+ref_unet = utils.get_unet(pipe, device_str)
+ref_unet.eval()
+unet_to_noise_pred = UNetModelWrapper(ref_unet)
 
 unet_to_noise_pred.eval()
 with torch.no_grad():
     ref_result = unet_to_noise_pred(input1, input2, input3, input4, input5)
 
+ref_result = ref_result.numpy()
 print("ref result")
 print(ref_result)
 
-# pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 
-# pipe.text_encoder.eval()
-# with torch.no_grad():
-#     ref_result = pipe.text_encoder_2(input, output_hidden_states=True)
-
-# pooled_prompt_embeds = ref_result[0]
-# prompt_embeds = ref_result.hidden_states[-2]
-
-
-# print(prompt_embeds)
-# print(pooled_prompt_embeds)
+import numpy as np
+np.testing.assert_allclose(our_out, ref_result, atol=1e-2)
