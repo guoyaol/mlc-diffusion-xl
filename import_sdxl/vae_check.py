@@ -14,7 +14,7 @@ vm = relax.VirtualMachine(rt_mod=ex, device=device)
 
 def wrapper(f, params):
     def wrapped_f(*args):
-        return f(*args, params)
+        return f(*args, *params)
 
     return wrapped_f
 
@@ -38,7 +38,8 @@ print("our result")
 nd_res1 = vae(input_nd)
 
 print("our result")
-print(nd_res1)
+our_out = nd_res1.numpy()
+print(our_out)
 
 
 #ref result
@@ -73,3 +74,5 @@ with torch.no_grad():
 print("ref result")
 print(ref_result)
 
+import numpy as np
+np.testing.assert_allclose(our_out, ref_result, atol=1e-5)

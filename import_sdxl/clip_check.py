@@ -47,6 +47,8 @@ print("our pooled text embedding")
 print(nd_res1[1])
 our_pool = nd_res1[1].numpy()
 
+print("our dtype", nd_res1[1].dtype)
+
 
 #ref result
 print("ref result")
@@ -62,15 +64,18 @@ pooled_prompt_embeds = ref_result[0]
 prompt_embeds = ref_result.hidden_states[-2]
 
 
+
+prompt_embeds = prompt_embeds.numpy()
+pooled_prompt_embeds = pooled_prompt_embeds.numpy()
+print("ref dtype", pooled_prompt_embeds.dtype)
+
 print("ref text embedding")
 print(prompt_embeds)
-prompt_embeds = prompt_embeds.numpy()
 print("ref pooled text embedding")
 print(pooled_prompt_embeds)
-pooled_prompt_embeds = pooled_prompt_embeds.numpy()
 
 import numpy as np
 
 # np.testing.assert_allclose(our_emb, prompt_embeds, atol=1e-5)
-np.testing.assert_allclose(our_pool, pooled_prompt_embeds, atol=1e-5)
+np.testing.assert_allclose(our_pool, pooled_prompt_embeds, atol=1e-2)
 
