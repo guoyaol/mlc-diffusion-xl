@@ -62,9 +62,14 @@ print("our result")
 nd_res1 = clip(input_nd)
 
 
-print(nd_res1[0])
-print(nd_res1[1])
+# print(nd_res1[0])
+# print(nd_res1[1])
 
+our_emb = nd_res1[0].numpy()
+our_pool = nd_res1[1].numpy()
+
+print(our_emb)
+print(our_pool)
 
 #ref result
 print("ref result")
@@ -81,3 +86,7 @@ prompt_embeds = ref_result.hidden_states[-2]
 
 print(prompt_embeds)
 print(pooled_prompt_embeds)
+
+import numpy as np
+np.testing.assert_allclose(our_emb, prompt_embeds, atol=1e-5)
+np.testing.assert_allclose(our_pool, pooled_prompt_embeds, atol=1e-5)
