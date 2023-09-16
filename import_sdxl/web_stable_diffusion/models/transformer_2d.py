@@ -293,9 +293,9 @@ class Transformer2DModel(nn.Module):
         #     attention_mask = attention_mask.unsqueeze(1)
 
         # convert encoder_attention_mask to a bias the same way we do for attention_mask
-        if encoder_attention_mask is not None and encoder_attention_mask.ndim == 2:
-            encoder_attention_mask = (1 - encoder_attention_mask.to(hidden_states.dtype)) * -10000.0
-            encoder_attention_mask = encoder_attention_mask.unsqueeze(1)
+        # if encoder_attention_mask is not None and encoder_attention_mask.ndim == 2:
+        #     encoder_attention_mask = (1 - encoder_attention_mask.to(hidden_states.dtype)) * -10000.0
+        #     encoder_attention_mask = encoder_attention_mask.unsqueeze(1)
 
         # 1. Input
         if self.is_input_continuous:
