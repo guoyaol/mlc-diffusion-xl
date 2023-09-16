@@ -956,16 +956,16 @@ class TVMUNet2DConditionModel(nn.Module):
 
             down_block_res_samples += res_samples
 
-        if down_block_additional_residuals is not None:
-            new_down_block_res_samples = ()
+        # if down_block_additional_residuals is not None:
+        #     new_down_block_res_samples = ()
 
-            for down_block_res_sample, down_block_additional_residual in zip(
-                down_block_res_samples, down_block_additional_residuals
-            ):
-                down_block_res_sample = down_block_res_sample + down_block_additional_residual
-                new_down_block_res_samples = new_down_block_res_samples + (down_block_res_sample,)
+        #     for down_block_res_sample, down_block_additional_residual in zip(
+        #         down_block_res_samples, down_block_additional_residuals
+        #     ):
+        #         down_block_res_sample = down_block_res_sample + down_block_additional_residual
+        #         new_down_block_res_samples = new_down_block_res_samples + (down_block_res_sample,)
 
-            down_block_res_samples = new_down_block_res_samples
+        #     down_block_res_samples = new_down_block_res_samples
 
         # 4. mid
         if self.mid_block is not None:
