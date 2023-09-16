@@ -1015,8 +1015,8 @@ class TVMUNet2DConditionModel(nn.Module):
             sample = self.conv_act(sample)
         sample = self.conv_out(sample)
 
-        if not return_dict:
-            return (sample,)
+        # if not return_dict:
+        #     return (sample,)
 
         # return UNet2DConditionOutput(sample=sample)
         return sample
