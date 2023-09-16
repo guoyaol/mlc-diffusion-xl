@@ -187,7 +187,7 @@ class BasicTransformerBlock(nn.Module):
                 norm_hidden_states,
                 encoder_hidden_states=encoder_hidden_states,
                 attention_mask=encoder_attention_mask,
-                **cross_attention_kwargs,
+                # **cross_attention_kwargs,
             )
             hidden_states = attn_output + hidden_states
 
