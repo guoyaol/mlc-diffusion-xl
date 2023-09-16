@@ -842,7 +842,8 @@ class TVMUNet2DConditionModel(nn.Module):
         # there might be better ways to encapsulate this.
         t_emb = t_emb.to(dtype=sample.dtype)
 
-        emb = self.time_embedding(t_emb, timestep_cond)
+        # emb = self.time_embedding(t_emb, timestep_cond)
+        emb = self.time_embedding(t_emb)
         aug_emb = None
 
         if self.class_embedding is not None:
