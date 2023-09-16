@@ -171,7 +171,7 @@ class BasicTransformerBlock(nn.Module):
             norm_hidden_states,
             encoder_hidden_states=encoder_hidden_states if self.only_cross_attention else None,
             attention_mask=attention_mask,
-            **cross_attention_kwargs,
+            # **cross_attention_kwargs,
         )
         if self.use_ada_layer_norm_zero:
             attn_output = gate_msa.unsqueeze(1) * attn_output
