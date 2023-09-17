@@ -8,8 +8,8 @@ pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1
 unet = utils.get_unet(pipe, device_str)
 unet.eval()
 
-torch.manual_seed(42)
-input1 = torch.rand((1, 4, 128, 128)).to(torch.float32)
+
+input1 = torch.rand((2, 4, 128, 128)).to(torch.float32)
 input2 = torch.tensor(3).to(torch.int32)
 input3 = torch.rand((2, 77, 2048)).to(torch.float32)
 input4 = torch.rand((2, 1280)).to(torch.float32)
@@ -55,10 +55,10 @@ class ref_UNetModelWrapper(torch.nn.Module):
 
 print("our result")
 
-our_unt_noise = UNetModelWrapper(unet)
+# our_unt_noise = UNetModelWrapper(unet)
 
 with torch.no_grad():
-    our_result = our_unt_noise(input1, input2, input3, input4, input5)
+    our_result = unet(input1, input2, input3, input4, input5)
 print(our_result)
 
 
@@ -72,9 +72,9 @@ added_cond_kwargs = {"text_embeds": input4, "time_ids": input5}
 #     return_dict=False,
 # )[0]
 pipe.unet.eval()
-ref_unet_noise = ref_UNetModelWrapper(pipe.unet)
+# ref_unet_noise = ref_UNetModelWrapper(pipe.unet)
 with torch.no_grad():
-    ref_result = ref_unet_noise(input1, input2, input3, added_cond_kwargs)
+    ref_result = pipe.unet(input1, input2, input3, added_cond_kwargs = added_cond_kwargs, return_dict=False)[0]
 
 print("ref result")
 print(ref_result)
