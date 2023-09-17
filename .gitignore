@@ -4,4 +4,6 @@ __pycache__
 .vscode
 .DS_Store
 try_scripts/
-dist/
+import_sdxl/dist/params/
+import_sdxl/dist/stable_diffusion.so
+unet_dist/
