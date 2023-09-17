@@ -978,8 +978,8 @@ class TVMUNet2DConditionModel(nn.Module):
                 encoder_attention_mask=encoder_attention_mask,
             )
 
-        if mid_block_additional_residual is not None:
-            sample = sample + mid_block_additional_residual
+        # if mid_block_additional_residual is not None:
+        #     sample = sample + mid_block_additional_residual
 
         # 5. up
         for i, upsample_block in enumerate(self.up_blocks):
