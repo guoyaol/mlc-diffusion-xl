@@ -1,1 +1,1 @@
-# mlc-diffusion-refiner
+# mlc-diffusion-XL
