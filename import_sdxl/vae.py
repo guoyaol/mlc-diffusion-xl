@@ -22,8 +22,8 @@ def vae_to_image(pipe) -> tvm.IRModule:
             # Scale the latents so that it can be decoded by VAE.
             latents = 1 / 0.13025 * latents
             # VAE decode
-            z = self.vae.post_quant_conv(latents)
-            image = self.vae.decoder(z)
+            # z = self.vae.post_quant_conv(latents)
+            image = self.vae.decode(latents, return_dict=False)[0]
             # Image normalization
             image = (image / 2 + 0.5).clamp(min=0, max=1)
             image = (image.permute(0, 2, 3, 1) * 255).round()
