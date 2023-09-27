@@ -94,3 +94,5 @@ print(graph_out)
 import numpy as np
 np.testing.assert_allclose(ref_result, graph_out, rtol=1e-2, atol=1e-3)
 
+print("model check success")
+
