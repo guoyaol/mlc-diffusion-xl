@@ -42,8 +42,8 @@ def euler_discrete_scheduler_steps() -> tvm.IRModule:
     bb = relax.BlockBuilder()
 
     # step, the function.
-    sample = relax.Var("sample", R.Tensor((1, 4, 64, 64), "float32"))
-    model_output = relax.Var("model_output", R.Tensor((1, 4, 64, 64), "float32"))
+    sample = relax.Var("sample", R.Tensor((1, 4, 128, 128), "float32"))
+    model_output = relax.Var("model_output", R.Tensor((1, 4, 128, 128), "float32"))
     sigma = relax.Var(f"sigma", R.Tensor((), "float32"))
     sigma_next = relax.Var(f"sigma", R.Tensor((), "float32"))
 
