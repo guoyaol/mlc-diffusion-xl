@@ -15,23 +15,15 @@ from torch import fx
 print(tvm.__file__)
 
 def cat_latents() -> tvm.IRModule:
-    class CatLatensWrapper(torch.nn.Module):
-        def __init__(self):
-            super().__init__()
+    bb = relax.BlockBuilder()
+    latents = relax.Var("latents", R.Tensor([1, 4, 128, 128], "float32"))
 
-        def forward(self, latents):
-            # Latent concatenation.
-            latent_model_input = torch.cat([latents] * 2, dim=0)
-            return latent_model_input
-
-    cat_latents = CatLatensWrapper()
-    graph = fx.symbolic_trace(cat_latents)
-    mod = from_fx(
-        graph,
-        [((1, 4, 128, 128), "float32")],
-        keep_params_as_input=True,
-    )
-    return tvm.IRModule({"cat_latents": mod["main"]})
+    with bb.function("cat_latents", [latents]):
+        res = bb.emit(
+            relax.op.concat([latents, latents], axis=0)
+        )
+        bb.emit_func_output(res)
+    return bb.get()
 
 cat = cat_latents()
 
