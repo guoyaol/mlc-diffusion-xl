@@ -19,51 +19,6 @@ import numpy as np
 
 from web_stable_diffusion import runtime
 
-
-class EulerDiscreteScheduler(runtime.Scheduler):
-    scheduler_name = "euler-discrete-solver"
-
-    def __init__(self, artifact_path: str, device) -> None:
-        with open(
-            f"{artifact_path}/scheduler_euler_discrete_consts.json", "r"
-        ) as file:
-            jsoncontent = file.read()
-        scheduler_consts = json.loads(jsoncontent)
-
-        def f_convert(data, dtype):
-            return [tvm.nd.array(np.array(t, dtype=dtype), device) for t in data]
-
-        self.timesteps = f_convert(scheduler_consts["timesteps"], "int32")
-        self.sigma = f_convert(scheduler_consts["sigma"], "float32")
-
-        # self.last_model_output: tvm.nd.NDArray = tvm.nd.empty(
-        #     (1, 4, 64, 64), "float32", device
-        # )
-
-    def step(
-        self,
-        vm: relax.VirtualMachine,
-        model_output: tvm.nd.NDArray,
-        sample: tvm.nd.NDArray,
-        counter: int,
-    ) -> tvm.nd.NDArray:
-        # model_output = vm["dpm_solver_multistep_scheduler_convert_model_output"](
-        #     sample, model_output, self.alpha[counter], self.sigma[counter]
-        # )
-        prev_latents = vm["euler_discrete_scheduler_step"](
-            sample,
-            model_output,
-            self.sigma[counter],
-            self.sigma[counter+1]
-        )
-        # self.last_model_output = model_output
-        return prev_latents
-
-    def scale_model_input(self, vm, sample: tvm.nd.NDArray, counter) -> tvm.nd.NDArray:
-        result = vm["euler_discrete_scheduler_scale"](sample, self.sigma[counter])
-        return result
-
-
 from PIL import Image
 from tqdm import tqdm
 from transformers import CLIPTokenizer
@@ -94,7 +49,7 @@ class TVMSDPipeline:
         self.concat_pool_embeddings = vm["concat_pool_embeddings"]
         self.concat_enocder_outputs = vm["concat_enocder_outputs"]
         self.image_to_rgba = vm["image_to_rgba"]
-        self.cat_latents = wrapper(vm["cat_latents"])
+        self.cat_latents = vm["cat_latents"]
         self.tokenizer = tokenizer
         self.tokenizer2 = tokenizer2
         self.scheduler = scheduler
@@ -209,7 +164,7 @@ class TVMSDPipeline:
             latent_model_input = self.cat_latents(latents)
 
             #TODO: some scheduler step
-            latent_model_input = self.scheduler.scale_model_input(self.vm, latent_model_input, t)
+            latent_model_input = self.scheduler.scale_model_input(self.vm, latent_model_input, i)
 
             noise_pred = self.unet_latents_to_noise_pred(latents, t, input_text_embeddings, add_text_embeds, add_time_ids)
             print("noise_pred shape: ", noise_pred)

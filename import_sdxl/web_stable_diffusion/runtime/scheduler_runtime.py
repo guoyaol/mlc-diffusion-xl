@@ -163,8 +163,8 @@ class EulerDiscreteScheduler(Scheduler):
         # self.last_model_output = model_output
         return prev_latents
     
-    def scale_model_input(self, vm, sample: tvm.nd.NDArray, sigma) -> tvm.nd.NDArray:
-        result = vm["euler_discrete_scheduler_scale"](sample, sigma)
+    def scale_model_input(self, vm, sample: tvm.nd.NDArray, counter: int) -> tvm.nd.NDArray:
+        result = vm["euler_discrete_scheduler_scale"](sample, self.sigma[counter])
         return result
 
 # def __init__(

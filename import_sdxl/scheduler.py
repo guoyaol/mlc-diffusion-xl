@@ -63,7 +63,7 @@ def euler_discrete_scheduler_scale() -> tvm.IRModule:
     bb = relax.BlockBuilder()
 
     # scale, the function.
-    sample = relax.Var("sample", R.Tensor((1, 4, 64, 64), "float32"))
+    sample = relax.Var("sample", R.Tensor((2, 4, 128, 128), "float32"))
     sigma = relax.Var(f"sigma", R.Tensor((), "float32"))
 
     with bb.function(
