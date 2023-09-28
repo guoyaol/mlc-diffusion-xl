@@ -12,11 +12,6 @@ ex = tvm.runtime.load_module("dist/stable_diffusion.so")
 
 vm = relax.VirtualMachine(rt_mod=ex, device=device)
 
-def wrapper(f, params):
-    def wrapped_f(*args):
-        return f(*args, params)
-
-    return wrapped_f
 
 
 import json
@@ -82,7 +77,7 @@ class TVMSDPipeline:
     ):
         def wrapper(f, params):
             def wrapped_f(*args):
-                return f(*args, params)
+                return f(*args, *params)
 
             return wrapped_f
 
@@ -95,6 +90,7 @@ class TVMSDPipeline:
         self.concat_pool_embeddings = vm["concat_pool_embeddings"]
         self.concat_enocder_outputs = vm["concat_enocder_outputs"]
         self.image_to_rgba = vm["image_to_rgba"]
+        self.cat_latents = wrapper(vm["cat_latents"])
         self.tokenizer = tokenizer
         self.tokenizer2 = tokenizer2
         self.scheduler = scheduler
@@ -190,21 +186,32 @@ class TVMSDPipeline:
 
 
         # Randomly initialize the latents.
-        latents = torch.randn(
-            (1, 4, 128, 128),
-            device="cpu",
-            dtype=torch.float32,
-        )
+        torch.manual_seed(42)
+        # latents = torch.randn(
+        #     (1, 4, 128, 128),
+        #     device="cpu",
+        #     dtype=torch.float32,
+        # )
+        latents = torch.randn((1, 4, 128, 128), generator=None, device="cuda", dtype=torch.float32, layout=torch.strided)
+        latents = latents.cpu()
+        latents = 13.1585 * latents
         latents = tvm.nd.array(latents.numpy(), self.tvm_device)
+
+        print("initialized latents", latents)
 
         # UNet iteration.
         for i in tqdm(range(len(self.scheduler.timesteps))):
             #TODO: add this
             #latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
             t = self.scheduler.timesteps[i]
+            latent_model_input = self.cat_latents(latents)
+
+            #TODO: some scheduler step
+
             noise_pred = self.unet_latents_to_noise_pred(latents, t, input_text_embeddings, add_text_embeds, add_time_ids)
-            print("noise_pred shape: ", noise_pred.shape)
+            print("noise_pred shape: ", noise_pred)
             latents = self.scheduler.step(self.vm, noise_pred, latents, i)
+            print("latents", latents)
 
         # VAE decode.
         image = self.vae_to_image(latents)
@@ -213,7 +220,6 @@ class TVMSDPipeline:
         image = self.image_to_rgba(image)
         return Image.fromarray(image.numpy().view("uint8").reshape(1024, 1024, 4))
 
-torch.manual_seed(42)    
 
 pipe = TVMSDPipeline(
     vm=vm,
