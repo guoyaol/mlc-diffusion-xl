@@ -59,5 +59,25 @@ def euler_discrete_scheduler_steps() -> tvm.IRModule:
 
     return bb.get()
 
-scheduler = euler_discrete_scheduler_steps()
+def euler_discrete_scheduler_scale() -> tvm.IRModule:
+    bb = relax.BlockBuilder()
+
+    # scale, the function.
+    sample = relax.Var("sample", R.Tensor((1, 4, 64, 64), "float32"))
+    sigma = relax.Var(f"sigma", R.Tensor((), "float32"))
+
+    with bb.function(
+        "euler_discrete_scheduler_scale",
+        [sample, sigma],
+    ):
+        scaled_latent_model_input = bb.emit(
+            sample / ((sigma** relax.const(2.0) + relax.const(1.0)) ** relax.const(0.5)),
+            "scaled_latent_model_input",
+        )
+        bb.emit_func_output(scaled_latent_model_input)
+
+    return bb.get()
+
+scheduler_step = euler_discrete_scheduler_steps()
+scheduler_scale = euler_discrete_scheduler_scale()
 print("successfully import")
