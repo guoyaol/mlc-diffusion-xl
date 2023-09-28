@@ -164,9 +164,9 @@ class TVMSDPipeline:
             latent_model_input = self.cat_latents(latents)
 
             #TODO: some scheduler step
-            latent_model_input = self.scheduler.scale_model_input(self.vm, latent_model_input, i)
+            scaled_latent_model_input = self.scheduler.scale_model_input(self.vm, latent_model_input, i)
 
-            noise_pred = self.unet_latents_to_noise_pred(latents, t, input_text_embeddings, add_text_embeds, add_time_ids)
+            noise_pred = self.unet_latents_to_noise_pred(scaled_latent_model_input, t, input_text_embeddings, add_text_embeds, add_time_ids)
             print("noise_pred shape: ", noise_pred)
             latents = self.scheduler.step(self.vm, noise_pred, latents, i)
             print("latents", latents)
