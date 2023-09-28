@@ -59,6 +59,10 @@ class EulerDiscreteScheduler(runtime.Scheduler):
         # self.last_model_output = model_output
         return prev_latents
 
+    def scale_model_input(self, vm, sample: tvm.nd.NDArray, counter) -> tvm.nd.NDArray:
+        result = vm["euler_discrete_scheduler_scale"](sample, self.sigma[counter])
+        return result
+
 
 from PIL import Image
 from tqdm import tqdm
@@ -201,12 +205,11 @@ class TVMSDPipeline:
 
         # UNet iteration.
         for i in tqdm(range(len(self.scheduler.timesteps))):
-            #TODO: add this
-            #latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
             t = self.scheduler.timesteps[i]
             latent_model_input = self.cat_latents(latents)
 
             #TODO: some scheduler step
+            latent_model_input = self.scheduler.scale_model_input(self.vm, latent_model_input, t)
 
             noise_pred = self.unet_latents_to_noise_pred(latents, t, input_text_embeddings, add_text_embeds, add_time_ids)
             print("noise_pred shape: ", noise_pred)
