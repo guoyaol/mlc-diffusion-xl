@@ -83,5 +83,6 @@ print(ref_result)
 
 print(our_result.shape)
 print(ref_result.shape)
-torch.allclose(our_result, ref_result)
+import numpy as np
+np.testing.assert_allclose(our_result.numpy(), ref_result.numpy(), atol=1e-5)
 print("model check success")

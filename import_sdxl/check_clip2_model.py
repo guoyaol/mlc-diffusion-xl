@@ -115,6 +115,7 @@ with torch.no_grad():
     print(ref_out[0])
 
 import numpy as np
-np.allclose(out.text_embeds.squeeze(1).numpy(), ref_out[0].numpy(), atol=1e-5)
-np.allclose(out.hidden_states[-2].numpy(), ref_out.hidden_states[-2].numpy(), atol=1e-5)
-print("model check success")
+np.testing.assert_allclose(out.text_embeds.squeeze(1).numpy(), ref_out[0].numpy(), atol=1e-6)
+print("embd check success")
+np.testing.assert_allclose(out.hidden_states[-2].numpy(), ref_out.hidden_states[-2].numpy())
+print("pool check success")

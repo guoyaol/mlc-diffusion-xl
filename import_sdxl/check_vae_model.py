@@ -30,5 +30,6 @@ with torch.no_grad():
 
 print(our_result.shape)
 print(ref_result.shape)
-torch.allclose(our_result, ref_result)
+import numpy as np
+np.testing.assert_allclose(our_result.numpy(), ref_result.numpy())
 print("model check success")
