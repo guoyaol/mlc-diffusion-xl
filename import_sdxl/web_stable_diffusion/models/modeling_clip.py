@@ -476,15 +476,12 @@ class CLIPTextTransformer(nn.Module):
         # text_embeds.shape = [batch_size, sequence_length, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)
         # casting to torch.int for onnx compatibility: argmax doesn't support int64 inputs with opset 14
-        # input_max = input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1)
-        input_max = 7
-        # pooled_output = last_hidden_state[
-        #     torch.arange(last_hidden_state.shape[0], device=last_hidden_state.device),
-        #     input_max,
-        # ]
-        temp_out = last_hidden_state.reshape((77, 1280))
-        pooled_output = temp_out[[input_max]]
-        pooled_output = pooled_output.reshape((1, 1, 1280))
+
+        #TODO: future to support batch_size > 1
+        squeezed_last_hidden_state = last_hidden_state.squeeze(0)
+        pooled_output = squeezed_last_hidden_state[
+            input_ids.to(dtype=torch.int, device=last_hidden_state.device).argmax(dim=-1),
+        ]
 
         if not return_dict:
             return (last_hidden_state, pooled_output) + encoder_outputs[1:]

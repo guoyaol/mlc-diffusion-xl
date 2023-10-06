@@ -29,7 +29,7 @@ def clip_to_text_embeddings2(pipe) -> tvm.IRModule:
         def forward(self, text_input_ids):
             result = self.clip(text_input_ids, output_hidden_states=True)
             text_embeddings = result.hidden_states[-2]
-            pool_text_embeddings = result.text_embeds.squeeze(1)
+            pool_text_embeddings = result.text_embeds
             return text_embeddings, pool_text_embeddings
         
     from transformers import CLIPTokenizer
