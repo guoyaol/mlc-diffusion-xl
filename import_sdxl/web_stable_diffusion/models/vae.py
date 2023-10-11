@@ -20,7 +20,7 @@ import torch.nn as nn
 
 # from ..utils import BaseOutput, is_torch_version, randn_tensor
 from .attention_processor import SpatialNorm
-from .unet_2d_blocks import UNetMidBlock2D, get_down_block, get_up_block
+from .unet_blocks import UNetMidBlock2D_vae, get_down_block, get_up_block
 
 def randn_tensor(
     shape: Union[Tuple, List],
@@ -128,7 +128,7 @@ class Encoder(nn.Module):
             self.down_blocks.append(down_block)
 
         # mid
-        self.mid_block = UNetMidBlock2D(
+        self.mid_block = UNetMidBlock2D_vae(
             in_channels=block_out_channels[-1],
             resnet_eps=1e-6,
             resnet_act_fn=act_fn,
@@ -222,7 +222,7 @@ class Decoder(nn.Module):
         temb_channels = in_channels if norm_type == "spatial" else None
 
         # mid
-        self.mid_block = UNetMidBlock2D(
+        self.mid_block = UNetMidBlock2D_vae(
             in_channels=block_out_channels[-1],
             resnet_eps=1e-6,
             resnet_act_fn=act_fn,

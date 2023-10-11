@@ -26,7 +26,7 @@ from torch import nn
 # from .transformer_2d import Transformer2DModel
 
 
-from .attention_processor_vae import Attention
+from .attention_processor import Attention_vae
 from .resnet import Downsample2D, ResnetBlock2D, Upsample2D
 
 
@@ -433,7 +433,7 @@ def get_up_block(
     raise ValueError(f"{up_block_type} does not exist.")
 
 
-class UNetMidBlock2D(nn.Module):
+class UNetMidBlock2D_vae(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -482,7 +482,7 @@ class UNetMidBlock2D(nn.Module):
         for _ in range(num_layers):
             if self.add_attention:
                 attentions.append(
-                    Attention(
+                    Attention_vae(
                         in_channels,
                         heads=in_channels // attention_head_dim,
                         dim_head=attention_head_dim,
