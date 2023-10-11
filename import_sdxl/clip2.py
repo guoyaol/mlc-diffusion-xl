@@ -62,11 +62,7 @@ def clip_to_text_embeddings2(pipe) -> tvm.IRModule:
     clip = get_clip(pipe)
     clip_to_text_embeddings = CLIPModelWrapper(clip)
 
-    clip_to_text_embeddings.eval()
-    with torch.no_grad():
-        out = clip_to_text_embeddings(input)
 
-    print(out)
 
     # Create random input (77 is the maximum length).
     text_input_ids = torch.rand((1, 77)).to(torch.int32)
