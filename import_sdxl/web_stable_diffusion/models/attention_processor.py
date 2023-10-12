@@ -1,4 +1,5 @@
 from typing import Callable, Optional, Union
+import math
 
 import torch
 import torch.nn.functional as F
@@ -612,8 +613,9 @@ class AttnProcessor2_0:
         # hidden_states = F.scaled_dot_product_attention(
         #     query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
         # )
-        import math
-        attn_weight = torch.softmax((query @ key.transpose(-2, -1) / math.sqrt(query.size(-1))) , dim=-1)
+        scale_factor = 1 / math.sqrt(query.size(-1))
+        attn_weight = query @ key.transpose(-2, -1) * scale_factor
+        attn_weight = torch.softmax(attn_weight, dim=-1)
         hidden_states = attn_weight @ value
 
         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
@@ -698,9 +700,13 @@ class AttnProcessor2_0_vae:
 
         # the output of sdp = (batch, num_heads, seq_len, head_dim)
         # TODO: add support for attn.scale when we move to Torch 2.1
-        hidden_states = F.scaled_dot_product_attention(
-            query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
-        )
+        # hidden_states = F.scaled_dot_product_attention(
+        #     query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
+        # )
+        scale_factor = 1 / math.sqrt(query.size(-1))
+        attn_weight = query @ key.transpose(-2, -1) * scale_factor
+        attn_weight = torch.softmax(attn_weight, dim=-1)
+        hidden_states = attn_weight @ value
 
         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
         hidden_states = hidden_states.to(query.dtype)
