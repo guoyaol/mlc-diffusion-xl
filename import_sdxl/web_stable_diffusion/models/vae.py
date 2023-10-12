@@ -20,7 +20,7 @@ import torch.nn as nn
 
 # from ..utils import BaseOutput, is_torch_version, randn_tensor
 from .attention_processor import SpatialNorm
-from .unet_blocks import UNetMidBlock2D_vae, get_down_block, get_up_block
+from .unet_2d_blocks import UNetMidBlock2D_vae, get_down_block, get_up_block
 
 def randn_tensor(
     shape: Union[Tuple, List],

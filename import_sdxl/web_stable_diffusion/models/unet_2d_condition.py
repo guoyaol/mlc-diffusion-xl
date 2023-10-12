@@ -8,7 +8,7 @@ import torch.utils.checkpoint
 import math
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from .unet_blocks import get_down_block, get_up_block, UNetMidBlock2DCrossAttn
+from .unet_2d_blocks import get_down_block, get_up_block, UNetMidBlock2DCrossAttn
 
 from .embeddings import (
     TimestepEmbedding,
