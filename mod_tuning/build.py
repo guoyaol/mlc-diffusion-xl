@@ -361,6 +361,22 @@ print_relax_funcnames(mod_deploy)
 new_params = utils.transform_params(mod_transform, params)
 utils.save_params(new_params, artifact_path="dist")
 
-print(mod_deploy)
 
 
+import pickle
+
+with open("deploy_mod.pkl", "wb") as f:
+    pickle.dump(mod_deploy, f)
+
+from tvm import meta_schedule as ms
+
+target = tvm.target.Target("apple/m2-gpu")
+device = tvm.metal()
+
+with target, tvm.transform.PassContext(opt_level=3):
+    mod_deploy = tvm.tir.transform.DefaultGPUSchedule()(mod_deploy)
+
+
+ex = relax.build(mod=mod_deploy, target=target)
+
+ex.export_library("dist/stable_diffusion.so")
