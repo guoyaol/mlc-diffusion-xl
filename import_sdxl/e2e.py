@@ -4,8 +4,8 @@ from tvm import relax
 import torch
 
 # Load the model weight parameters back.
-target = tvm.target.Target("cuda")
-device = tvm.cuda()
+target = tvm.target.Target("apple/m2-gpu")
+device = tvm.metal()
 const_params_dict = utils.load_params(artifact_path="dist", device=device)
 # Load the model executable back from the shared library.
 ex = tvm.runtime.load_module("dist/stable_diffusion.so")
@@ -165,7 +165,7 @@ class TVMSDPipeline:
         #     device="cpu",
         #     dtype=torch.float32,
         # )
-        latents = torch.randn((1, 4, 128, 128), generator=None, device="cuda", dtype=torch.float32, layout=torch.strided)
+        latents = torch.randn((1, 4, 128, 128), generator=None, device="mps", dtype=torch.float32, layout=torch.strided)
         latents = latents.cpu()
         latents = 13.1585 * latents
         latents = tvm.nd.array(latents.numpy(), self.tvm_device)
@@ -177,7 +177,6 @@ class TVMSDPipeline:
             t = self.scheduler.timesteps[i]
             latent_model_input = self.cat_latents(latents)
 
-            #TODO: some scheduler step
             scaled_latent_model_input = self.scheduler.scale_model_input(self.vm, latent_model_input, i)
 
             noise_pred = self.unet_latents_to_noise_pred(scaled_latent_model_input, t, input_text_embeddings, add_text_embeds, add_time_ids)
