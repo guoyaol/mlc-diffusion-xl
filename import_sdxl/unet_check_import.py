@@ -15,8 +15,8 @@ from typing import Dict, List
 
 tokenizer=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
 
-target = tvm.target.Target("cuda")
-device = tvm.cuda()
+target = tvm.target.Target("apple/m2-gpu")
+device = tvm.metal()
 # const_params_dict = utils.load_params(artifact_path="dist", device=device)
 # # Load the model executable back from the shared library.
 # ex = tvm.runtime.load_module("dist/stable_diffusion.so")
@@ -125,8 +125,6 @@ mod, params = relax.frontend.detach_params(mod)
 # mod = relax.pipeline.get_pipeline()(mod)
 mod = relax.pipeline.transform.LegalizeOps()(mod)
 
-target = tvm.target.Target("cuda")
-device = tvm.cuda()
 
 with target, tvm.transform.PassContext(opt_level=3):
     mod = tvm.tir.transform.DefaultGPUSchedule()(mod)

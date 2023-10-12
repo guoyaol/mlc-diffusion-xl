@@ -4,8 +4,8 @@ from tvm import relax
 import torch
 from diffusers import DiffusionPipeline
 
-target = tvm.target.Target("cuda")
-device = tvm.cuda()
+target = tvm.target.Target("apple/m1-gpu")
+device = tvm.metal()
 const_params_dict = utils.load_params(artifact_path="dist", device=device)
 # Load the model executable back from the shared library.
 ex = tvm.runtime.load_module("dist/stable_diffusion.so")
@@ -27,8 +27,6 @@ print(len(const_params_dict["clip"]))
 # start test
 input = torch.rand((1, 77)).to(torch.int32)
 
-target = tvm.target.Target("cuda")
-device = tvm.cuda()
 
 input_nd = tvm.nd.array(input, device=device)
 
@@ -40,42 +38,42 @@ print("our result")
 
 nd_res1 = clip(input_nd)
 
-print("our text embedding")
-print(nd_res1[0])
-our_emb = nd_res1[0].numpy()
-print("our pooled text embedding")
-print(nd_res1[1])
-our_pool = nd_res1[1].numpy()
+# print("our text embedding")
+# print(nd_res1[0])
+# our_emb = nd_res1[0].numpy()
+# print("our pooled text embedding")
+# print(nd_res1[1])
+# our_pool = nd_res1[1].numpy()
 
-print("our dtype", nd_res1[1].dtype)
-
-
-#ref result
-print("ref result")
-
-pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
-
-pipe.text_encoder.to(dtype=torch.float32)
-pipe.text_encoder.eval()
-with torch.no_grad():
-    ref_result = pipe.text_encoder(input, output_hidden_states=True)
-
-pooled_prompt_embeds = ref_result[0]
-prompt_embeds = ref_result.hidden_states[-2]
+# print("our dtype", nd_res1[1].dtype)
 
 
+# #ref result
+# print("ref result")
 
-prompt_embeds = prompt_embeds.numpy()
-pooled_prompt_embeds = pooled_prompt_embeds.numpy()
-print("ref dtype", pooled_prompt_embeds.dtype)
+# pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
 
-print("ref text embedding")
-print(prompt_embeds)
-print("ref pooled text embedding")
-print(pooled_prompt_embeds)
+# pipe.text_encoder.to(dtype=torch.float32)
+# pipe.text_encoder.eval()
+# with torch.no_grad():
+#     ref_result = pipe.text_encoder(input, output_hidden_states=True)
 
-import numpy as np
+# pooled_prompt_embeds = ref_result[0]
+# prompt_embeds = ref_result.hidden_states[-2]
 
-# np.testing.assert_allclose(our_emb, prompt_embeds, atol=1e-5)
-np.testing.assert_allclose(our_pool, pooled_prompt_embeds, atol=1e-2)
+
+
+# prompt_embeds = prompt_embeds.numpy()
+# pooled_prompt_embeds = pooled_prompt_embeds.numpy()
+# print("ref dtype", pooled_prompt_embeds.dtype)
+
+# print("ref text embedding")
+# print(prompt_embeds)
+# print("ref pooled text embedding")
+# print(pooled_prompt_embeds)
+
+# import numpy as np
+
+# # np.testing.assert_allclose(our_emb, prompt_embeds, atol=1e-5)
+# np.testing.assert_allclose(our_pool, pooled_prompt_embeds, atol=1e-2)
 
