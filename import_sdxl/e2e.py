@@ -4,8 +4,10 @@ from tvm import relax
 import torch
 
 # Load the model weight parameters back.
-target = tvm.target.Target("apple/m2-gpu")
-device = tvm.metal()
+target = tvm.target.Target("cuda")
+device = tvm.cuda()
+torch_device = "cuda"
+
 const_params_dict = utils.load_params(artifact_path="dist", device=device)
 # Load the model executable back from the shared library.
 ex = tvm.runtime.load_module("dist/stable_diffusion.so")
@@ -68,7 +70,6 @@ class TVMSDPipeline:
         prompt_embeds_list = []
 
         #prompt
-        count = 0
         for tokenizer, text_encoder in zip(tokenizers, text_encoders):
             text_inputs = tokenizer(
                     prompt,
@@ -78,23 +79,13 @@ class TVMSDPipeline:
                     return_tensors="pt",
                 )
             # TODO: better if can find a better tokenizer
-            if count==1:
-                our_out = text_inputs.input_ids
-                for i in range(text_inputs.attention_mask.shape[1]):
-                    if text_inputs.attention_mask[0][i] == 0:
-                        our_out[0][i] = 0
-                text_input_ids = our_out.to(torch.int32)
-            else:
-                text_input_ids = text_inputs.input_ids.to(torch.int32)
-            count+=1
+            text_input_ids = text_inputs.input_ids.to(torch.int32)
+
 
             # Clip the text if the length exceeds the maximum allowed length.
             if text_input_ids.shape[-1] > self.tokenizer.model_max_length:
                 text_input_ids = text_input_ids[:, : self.tokenizer.model_max_length]
-            
-            
-
-
+  
 
             # Compute text embeddings.
             text_input_ids = tvm.nd.array(text_input_ids.cpu().numpy(), self.tvm_device)
@@ -108,7 +99,6 @@ class TVMSDPipeline:
 
         if negative_prompt != "":
             neg_prompt_embeds_list = []
-            count = 0
             for tokenizer, text_encoder in zip(tokenizers, text_encoders):
                 neg_text_inputs = tokenizer(
                         negative_prompt,
@@ -117,15 +107,9 @@ class TVMSDPipeline:
                         truncation=True,
                         return_tensors="pt",
                     )
-                if count==1:
-                    neg_our_out = neg_text_inputs.input_ids
-                    for i in range(neg_text_inputs.attention_mask.shape[1]):
-                        if neg_text_inputs.attention_mask[0][i] == 0:
-                            neg_our_out[0][i] = 0
-                    neg_text_input_ids = neg_our_out.to(torch.int32)
-                else:
-                    neg_text_input_ids = neg_text_inputs.input_ids.to(torch.int32)
-                count+=1
+
+                neg_text_input_ids = neg_text_inputs.input_ids.to(torch.int32)
+
 
                 if neg_text_input_ids.shape[-1] > self.tokenizer.model_max_length:
                     neg_text_input_ids = neg_text_input_ids[:, : self.tokenizer.model_max_length]
@@ -165,7 +149,7 @@ class TVMSDPipeline:
         #     device="cpu",
         #     dtype=torch.float32,
         # )
-        latents = torch.randn((1, 4, 128, 128), generator=None, device="mps", dtype=torch.float32, layout=torch.strided)
+        latents = torch.randn((1, 4, 128, 128), generator=None, device=torch_device, dtype=torch.float32, layout=torch.strided)
         latents = latents.cpu()
         latents = 13.1585 * latents
         latents = tvm.nd.array(latents.numpy(), self.tvm_device)
@@ -195,7 +179,7 @@ class TVMSDPipeline:
 pipe = TVMSDPipeline(
     vm=vm,
     tokenizer=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14"),
-    tokenizer2=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14"),
+    tokenizer2=CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14", pad_token = "!"),
     scheduler=runtime.EulerDiscreteScheduler(artifact_path="dist", device=device),
     tvm_device=device,
     param_dict=const_params_dict,
