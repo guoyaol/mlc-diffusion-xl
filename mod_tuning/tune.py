@@ -22,7 +22,7 @@ def tune(mod: tvm.IRModule) -> None:
         #         session_timeout_sec=50,
         #     )
         # ),
-        runner = ms.runner.LocalRunner(),
+        runner = ms.runner.LocalRunner(timeout_sec=60),
         work_dir="log_db_tuning",
         max_trials_global=202000,
         max_trials_per_task=1000,
