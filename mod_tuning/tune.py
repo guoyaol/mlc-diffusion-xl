@@ -12,7 +12,7 @@ def tune(mod: tvm.IRModule) -> None:
         target=tvm.target.Target("apple/m1-gpu-restricted"),
         params={},
         builder=ms.builder.LocalBuilder(
-            max_workers=6,
+            max_workers=1,
         ),
         # runner=ms.runner.RPCRunner(
         #     ms.runner.RPCConfig(
@@ -22,7 +22,7 @@ def tune(mod: tvm.IRModule) -> None:
         #         session_timeout_sec=50,
         #     )
         # ),
-        runner = ms.runner.LocalRunner(timeout_sec=60),
+        runner = ms.runner.LocalRunner(timeout_sec=100),
         work_dir="log_db_tuning",
         max_trials_global=202000,
         max_trials_per_task=1000,
