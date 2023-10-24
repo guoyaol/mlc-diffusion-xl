@@ -13,7 +13,6 @@ def tune(mod: tvm.IRModule) -> None:
         params={},
         builder=ms.builder.LocalBuilder(
             max_workers=6,
-            timeout_sec=200,
         ),
         # runner=ms.runner.RPCRunner(
         #     ms.runner.RPCConfig(
@@ -23,7 +22,7 @@ def tune(mod: tvm.IRModule) -> None:
         #         session_timeout_sec=50,
         #     )
         # ),
-        runner = ms.runner.LocalRunner(timeout_sec=200),
+        runner = ms.runner.LocalRunner(),
         work_dir="log_db_tuning",
         max_trials_global=101000,
         max_trials_per_task=500,
