@@ -11240,7 +11240,8 @@ class Module:
             lv1137_1 = R.call_tir(cls.fused_reshape33_transpose29_add22_resize2d, (lv1136_1, lv983_1), out_sinfo=R.Tensor((2, 1280, 64, 64), dtype="float32"))
             lv2175: R.Tensor((1280, 1280, 3, 3), dtype="float32") = transformed_param_764
             lv2176: R.Tensor((1, 1280, 1, 1), dtype="float32") = transformed_param_1587
-            lv1138_1 = R.call_tir(cls.fused_conv2d14_add26, (lv1137_1, lv2175, lv2176), out_sinfo=R.Tensor((2, 1280, 64, 64), dtype="float32"))
+            # lv1138_1 = R.call_tir(cls.fused_conv2d14_add26, (lv1137_1, lv2175, lv2176), out_sinfo=R.Tensor((2, 1280, 64, 64), dtype="float32"))
+            lv1138_1 = lv1137_1
             lv4670 = R.call_tir(cls.concatenate6, (lv1138_1, lv173), out_sinfo=R.Tensor((2, 1920, 64, 64), dtype="float32"))
             lv2177: R.Tensor((1920,), dtype="float32") = transformed_param_841
             lv2178_1: R.Tensor((1920,), dtype="float32") = transformed_param_840
@@ -11625,7 +11626,8 @@ class Module:
             lv1258_1 = R.call_tir(cls.fused_reshape26_transpose20_add15_resize2d1, (lv1257_1, lv1224_2), out_sinfo=R.Tensor((2, 640, 128, 128), dtype="float32"))
             lv2351: R.Tensor((640, 640, 3, 3), dtype="float32") = transformed_param_861
             lv2352_1: R.Tensor((1, 640, 1, 1), dtype="float32") = transformed_param_1666
-            lv1259_1 = R.call_tir(cls.fused_conv2d21_add27, (lv1258_1, lv2351, lv2352_1), out_sinfo=R.Tensor((2, 640, 128, 128), dtype="float32"))
+            # lv1259_1 = R.call_tir(cls.fused_conv2d21_add27, (lv1258_1, lv2351, lv2352_1), out_sinfo=R.Tensor((2, 640, 128, 128), dtype="float32"))
+            lv1259_1 = lv1258_1
             lv5181 = R.call_tir(cls.concatenate9, (lv1259_1, lv93), out_sinfo=R.Tensor((2, 960, 128, 128), dtype="float32"))
             lv2353: R.Tensor((960,), dtype="float32") = transformed_param_866
             lv2354_1: R.Tensor((960,), dtype="float32") = transformed_param_865
@@ -11741,9 +11743,11 @@ class Module:
             lv10 = R.call_tir(cls.fused_reshape37_transpose33, (lv7,), out_sinfo=R.Tensor((1, 1, 16384, 512), dtype="float32"))
             lv11 = R.call_tir(cls.fused_reshape37_transpose33_transpose34, (lv8,), out_sinfo=R.Tensor((1, 1, 512, 16384), dtype="float32"))
             lv12 = R.call_tir(cls.fused_reshape37_transpose33, (lv9,), out_sinfo=R.Tensor((1, 1, 16384, 512), dtype="float32"))
-            lv13 = R.call_tir(cls.fused_matmul28_multiply13, (lv10, lv11, R.const(0.044194173067808151, "float32")), out_sinfo=R.Tensor((1, 1, 16384, 16384), dtype="float32"))
+            # lv13 = R.call_tir(cls.fused_matmul28_multiply13, (lv10, lv11, R.const(0.044194173067808151, "float32")), out_sinfo=R.Tensor((1, 1, 16384, 16384), dtype="float32"))
+            lv13 = lv10
             lv44 = R.call_tir(cls.softmax5, (lv13,), out_sinfo=R.Tensor((1, 1, 16384, 16384), dtype="float32"))
-            lv45 = R.call_tir(cls.matmul29, (lv44, lv12), out_sinfo=R.Tensor((1, 1, 16384, 512), dtype="float32"))
+            # lv45 = R.call_tir(cls.matmul29, (lv44, lv12), out_sinfo=R.Tensor((1, 1, 16384, 512), dtype="float32"))
+            lv45 = lv12
             lv14 = R.call_tir(cls.fused_transpose35_reshape38, (lv45,), out_sinfo=R.Tensor((1, 16384, 512), dtype="float32"))
             lv2413: R.Tensor((512, 512), dtype="float32") = transformed_param_107
             lv2414: R.Tensor((512,), dtype="float32") = transformed_param_7
@@ -11969,7 +11973,7 @@ def tune(mod: tvm.IRModule) -> None:
         ),
         runner=ms.runner.LocalRunner(timeout_sec = 300),
         work_dir="log_db_tuning",
-        max_trials_global=96500,
+        max_trials_global=94500,
         max_trials_per_task=500,
         strategy=ms.search_strategy.EvolutionarySearch(init_min_unmeasured=10, max_fail_count=20),
     )
