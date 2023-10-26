@@ -1,3 +1,8 @@
+from tvm.script import ir as I
+from tvm.script import tir as T
+from tvm.script import relax as R
+import tvm
+
 metadata = tvm.ir.load_json("""{
   \"root\": 1, 
   \"nodes\": [
@@ -11835,7 +11840,8 @@ class Module:
             lv144 = R.call_tir(cls.resize2d3, (lv45_1,), out_sinfo=R.Tensor((1, 512, 512, 512), dtype="float32"))
             lv2473: R.Tensor((512, 512, 3, 3), dtype="float32") = transformed_param_59
             lv2474: R.Tensor((1, 512, 1, 1), dtype="float32") = transformed_param_123
-            lv46 = R.call_tir(cls.fused_conv2d31_add36, (lv144, lv2473, lv2474), out_sinfo=R.Tensor((1, 512, 512, 512), dtype="float32"))
+            # lv46 = R.call_tir(cls.fused_conv2d31_add36, (lv144, lv2473, lv2474), out_sinfo=R.Tensor((1, 512, 512, 512), dtype="float32"))
+            lv46 = lv144
             lv2475: R.Tensor((512,), dtype="float32") = transformed_param_64
             lv2476: R.Tensor((512,), dtype="float32") = transformed_param_63
             lv47 = R.call_tir(cls.fused_group_norm17_silu15, (lv46, lv2475, lv2476), out_sinfo=R.Tensor((1, 512, 512, 512), dtype="float32"))
@@ -11878,13 +11884,15 @@ class Module:
             lv187 = R.call_tir(cls.resize2d4, (lv59,), out_sinfo=R.Tensor((1, 256, 1024, 1024), dtype="float32"))
             lv2501: R.Tensor((256, 256, 3, 3), dtype="float32") = transformed_param_79
             lv2502: R.Tensor((1, 256, 1, 1), dtype="float32") = transformed_param_131
-            lv60 = R.call_tir(cls.fused_conv2d35_add39, (lv187, lv2501, lv2502), out_sinfo=R.Tensor((1, 256, 1024, 1024), dtype="float32"))
+            # lv60 = R.call_tir(cls.fused_conv2d35_add39, (lv187, lv2501, lv2502), out_sinfo=R.Tensor((1, 256, 1024, 1024), dtype="float32"))
+            lv60 = lv187
             lv2503: R.Tensor((256,), dtype="float32") = transformed_param_84
             lv2504: R.Tensor((256,), dtype="float32") = transformed_param_83
             lv61 = R.call_tir(cls.fused_group_norm19_silu17, (lv60, lv2503, lv2504), out_sinfo=R.Tensor((1, 256, 1024, 1024), dtype="float32"))
             lv2505: R.Tensor((128, 256, 3, 3), dtype="float32") = transformed_param_80
             lv2506: R.Tensor((1, 128, 1, 1), dtype="float32") = transformed_param_132
-            lv62 = R.call_tir(cls.fused_conv2d36_add40, (lv61, lv2505, lv2506), out_sinfo=R.Tensor((1, 128, 1024, 1024), dtype="float32"))
+            # lv62 = R.call_tir(cls.fused_conv2d36_add40, (lv61, lv2505, lv2506), out_sinfo=R.Tensor((1, 128, 1024, 1024), dtype="float32"))
+            lv62 = lv61
             lv2507: R.Tensor((128,), dtype="float32") = transformed_param_86
             lv2508: R.Tensor((128,), dtype="float32") = transformed_param_85
             lv63 = R.call_tir(cls.fused_group_norm20_silu18, (lv62, lv2507, lv2508), out_sinfo=R.Tensor((1, 128, 1024, 1024), dtype="float32"))
@@ -11928,3 +11936,26 @@ class Module:
             gv: R.Tensor((1, 1024, 1024, 3), dtype="float32") = lv76
             R.output(gv)
         return gv
+
+mod = Module
+
+def tune(mod: tvm.IRModule) -> None:
+    from tvm import meta_schedule as ms
+
+    ms.relax_integration.tune_relax(
+        mod=mod,
+        target=tvm.target.Target("apple/m1-gpu-restricted"),
+        params={},
+        builder=ms.builder.LocalBuilder(
+            max_workers=6,
+            timeout_sec = 300
+        ),
+        runner=ms.runner.LocalRunner(timeout_sec = 300),
+        work_dir="log_db_tuning",
+        max_trials_global=99000,
+        max_trials_per_task=500,
+        strategy=ms.search_strategy.EvolutionarySearch(init_min_unmeasured=10, max_fail_count=20),
+    )
+
+
+tune(mod)
