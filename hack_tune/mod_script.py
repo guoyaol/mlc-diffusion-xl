@@ -11858,7 +11858,8 @@ class Module:
             lv47 = R.call_tir(cls.fused_group_norm17_silu15, (lv46, lv2475, lv2476), out_sinfo=R.Tensor((1, 512, 512, 512), dtype="float32"))
             lv2477: R.Tensor((256, 512, 3, 3), dtype="float32") = transformed_param_60
             lv2478: R.Tensor((1, 256, 1, 1), dtype="float32") = transformed_param_124
-            lv48 = R.call_tir(cls.fused_conv2d32_add37, (lv47, lv2477, lv2478), out_sinfo=R.Tensor((1, 256, 512, 512), dtype="float32"))
+            # lv48 = R.call_tir(cls.fused_conv2d32_add37, (lv47, lv2477, lv2478), out_sinfo=R.Tensor((1, 256, 512, 512), dtype="float32"))
+            lv48 = lv47
             lv2479: R.Tensor((256,), dtype="float32") = transformed_param_66
             lv2480: R.Tensor((256,), dtype="float32") = transformed_param_65
             lv49 = R.call_tir(cls.fused_group_norm18_silu16, (lv48, lv2479, lv2480), out_sinfo=R.Tensor((1, 256, 512, 512), dtype="float32"))
