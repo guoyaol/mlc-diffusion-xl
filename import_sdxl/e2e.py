@@ -4,9 +4,9 @@ from tvm import relax
 import torch
 
 # Load the model weight parameters back.
-target = tvm.target.Target("cuda")
-device = tvm.cuda()
-torch_device = "cuda"
+target = tvm.target.Target("apple/m2-gpu")
+device = tvm.metal()
+torch_device = "mps"
 
 const_params_dict = utils.load_params(artifact_path="dist", device=device)
 # Load the model executable back from the shared library.
@@ -38,7 +38,7 @@ class TVMSDPipeline:
     ):
         def wrapper(f, params):
             def wrapped_f(*args):
-                return f(*args, *params)
+                return f(*args, params)
 
             return wrapped_f
 
