@@ -381,7 +381,7 @@ class Module:
                 T.writes(A_red_temp_v0[v_ax0], A_red_temp_v1[v_ax0])
                 with T.init():
                     A_red_temp_v0[v_ax0] = T.int32(-1)
-                    A_red_temp_v1[v_ax0] = -2147483648
+                    A_red_temp_v1[v_ax0] = -2147483647
                 v_A_red_temp_v0: T.int32 = T.Select(A_red_temp_v1[v_ax0] > A[v_ax0, v_k1] or A_red_temp_v1[v_ax0] == A[v_ax0, v_k1] and A_red_temp_v0[v_ax0] < v_k1, A_red_temp_v0[v_ax0], v_k1)
                 v_A_red_temp_v1: T.int32 = T.Select(A_red_temp_v1[v_ax0] > A[v_ax0, v_k1], A_red_temp_v1[v_ax0], A[v_ax0, v_k1])
                 A_red_temp_v0[v_ax0] = v_A_red_temp_v0
